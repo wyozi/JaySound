@@ -9,6 +9,7 @@ import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.*;
+import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 
 import java.io.File;
@@ -131,6 +132,11 @@ public class Context {
         }
     }
     public static void main(String[] args) throws InterruptedException, IOException {
+        Configurator.defaultConfig()
+                .formatPattern("{level}: {class}.{method}()\\t{message}")
+                .level(org.pmw.tinylog.Level.DEBUG)
+                .activate();
+
         Context ss = new Context();
         ss.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
@@ -138,8 +144,8 @@ public class Context {
         handle.play();
 
         for (int i = 0;i < 50000; i++) {
-            float x = (float) (Math.cos(i / 60f)*1.5f);
-            float z = (float) (Math.sin(i/60f)*1.5f);
+            float x = (float) (Math.cos(i/30f)*1.5f);
+            float z = (float) (Math.sin(i/30f)*1.5f);
             handle.setPos(new ThrowawayVec3f(x, 0, z));
             //ss.updateListener(new Vec3f(x, 0, z), new Vec3f(0, 0, 1), null);
             //System.out.println(x + " x " + z);

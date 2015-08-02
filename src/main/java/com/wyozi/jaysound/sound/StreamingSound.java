@@ -5,6 +5,7 @@ import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.decoder.DecoderCallback;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
+import org.pmw.tinylog.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -134,6 +135,8 @@ public class StreamingSound extends Sound {
             bdata.put(data);
             bdata.rewind();
         }
+
+        Logger.debug("Writing {} bytes of delicious PCM data into buffer #{}", bdata.capacity(), buffer);
 
         AL10.alBufferData(
                 buffer,
