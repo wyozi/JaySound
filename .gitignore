@@ -1,0 +1,6 @@
+# Misc
+libs/
+target/
+
+# IDEA
+JaySound.iml
