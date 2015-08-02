@@ -58,7 +58,7 @@ public class StreamingSound extends Sound {
         }
 
         int processed = AL10.alGetSourcei(source, AL10.AL_BUFFERS_PROCESSED);
-        while (processed > 0) {
+        while (processed > 0 && hasSomeData()) {
             int buffer = AL10.alSourceUnqueueBuffers(source);
             readInto(buffer);
             AL10.alSourceQueueBuffers(source, buffer);
