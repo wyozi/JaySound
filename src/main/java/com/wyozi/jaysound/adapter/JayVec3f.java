@@ -5,7 +5,7 @@ package com.wyozi.jaysound.adapter;
  * @since 2.8.2015
  */
 public interface JayVec3f {
-    public float getX();
-    public float getY();
-    public float getZ();
+    float getJayX();
+    float getJayY();
+    float getJayZ();
 }

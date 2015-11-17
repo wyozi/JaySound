@@ -2,10 +2,7 @@ package com.wyozi.jaysound.sound;
 
 import com.wyozi.jaysound.Context;
 import com.wyozi.jaysound.adapter.JayVec3f;
-import com.wyozi.jaysound.decoder.Decoder;
 import org.lwjgl.openal.AL10;
-
-import java.io.IOException;
 
 /**
  * @author Wyozi
@@ -28,17 +25,17 @@ public abstract class Sound {
     public void update() {}
 
     public void setPos(JayVec3f pos) {
-        AL10.alSource3f(source, AL10.AL_POSITION, pos.getX(), pos.getY(), pos.getZ());
+        AL10.alSource3f(source, AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());
         Context.checkALError();
     }
 
     public void setDirection(JayVec3f dir) {
-        AL10.alSource3f(source, AL10.AL_DIRECTION, dir.getX(), dir.getY(), dir.getZ());
+        AL10.alSource3f(source, AL10.AL_DIRECTION, dir.getJayX(), dir.getJayY(), dir.getJayZ());
         Context.checkALError();
     }
 
     public void setVelocity(JayVec3f vel) {
-        AL10.alSource3f(source, AL10.AL_VELOCITY, vel.getX(), vel.getY(), vel.getZ());
+        AL10.alSource3f(source, AL10.AL_VELOCITY, vel.getJayX(), vel.getJayY(), vel.getJayZ());
         Context.checkALError();
     }
 

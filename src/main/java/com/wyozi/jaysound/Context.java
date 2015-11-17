@@ -12,7 +12,6 @@ import org.lwjgl.openal.*;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
@@ -70,14 +69,14 @@ public class Context {
 
     private FloatBuffer listenerOri = (FloatBuffer) BufferUtils.createFloatBuffer(6).put(new float[] { 0.0f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f }).rewind();
     public void updateListener(JayVec3f pos, JayVec3f dir, JayVec3f velocity) {
-        AL10.alListener3f(AL10.AL_POSITION, pos.getX(), pos.getY(), pos.getZ());
+        AL10.alListener3f(AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());
         if (dir != null) {
-            listenerOri.put(new float[] {dir.getX(), dir.getY(), dir.getZ(), 0.0f, 1.0f, 0.0f});
+            listenerOri.put(new float[] {dir.getJayX(), dir.getJayY(), dir.getJayZ(), 0.0f, 1.0f, 0.0f});
             listenerOri.flip();
             AL10.alListenerfv(AL10.AL_ORIENTATION, listenerOri);
         }
         if (velocity != null) {
-            AL10.alListener3f(AL10.AL_VELOCITY, velocity.getX(), velocity.getY(), velocity.getZ());
+            AL10.alListener3f(AL10.AL_VELOCITY, velocity.getJayX(), velocity.getJayY(), velocity.getJayZ());
         }
     }
 
@@ -117,17 +116,17 @@ public class Context {
         }
 
         @Override
-        public float getX() {
+        public float getJayX() {
             return x;
         }
 
         @Override
-        public float getY() {
+        public float getJayY() {
             return y;
         }
 
         @Override
-        public float getZ() {
+        public float getJayZ() {
             return z;
         }
     }
