@@ -92,6 +92,14 @@ public class StreamingSound extends Sound {
     }
 
     public void load(Decoder decoder) throws IOException {
+        AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, 2f);
+        AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, 200f);
+        AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 0.7f); // exponential
+
+        AL10.alSourcef(source, AL10.AL_PITCH, 1.0f);
+        AL10.alSourcef(source, AL10.AL_GAIN, 1.0f);
+        Context.checkALError();
+
         new Thread(() -> {
             try {
                 loadInternal(decoder);
@@ -161,14 +169,6 @@ public class StreamingSound extends Sound {
     }
 
     private void loadInternal(Decoder decoder) throws IOException {
-        AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, 1f);
-        AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, 1000f);
-        AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 1f); // exponential
-
-        AL10.alSourcef(source, AL10.AL_PITCH, 1.0f);
-        AL10.alSourcef(source, AL10.AL_GAIN, 1.0f);
-        Context.checkALError();
-
         decoder.readFully(new DecoderCallback() {
             @Override
             public void writePCM(byte[] data, int offset, int length) {
