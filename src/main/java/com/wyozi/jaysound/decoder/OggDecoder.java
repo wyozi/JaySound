@@ -50,23 +50,4 @@ public class OggDecoder extends Decoder {
         audioInputStream.close();
     }
 
-    public static void main(String[] args) throws IOException {
-        OggDecoder oggDecoder = new OggDecoder(new FileInputStream("GameClient/assets/summersamba.ogg"));
-
-        final PCMPlayer player = new PCMPlayer();
-        oggDecoder.readFully(player);
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            try {
-                player.play();
-            } catch (LineUnavailableException e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
 }

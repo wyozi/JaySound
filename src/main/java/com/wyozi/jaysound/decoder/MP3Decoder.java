@@ -45,24 +45,4 @@ public class MP3Decoder extends Decoder {
 
         audioInputStream.close();
     }
-
-    public static void main(String[] args) throws IOException {
-        MP3Decoder oggDecoder = new MP3Decoder(new FileInputStream("GameClient/assets/finewhine.mp3"));
-
-        final PCMPlayer player = new PCMPlayer();
-        oggDecoder.readFully(player);
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            try {
-                player.play();
-            } catch (LineUnavailableException e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
 }

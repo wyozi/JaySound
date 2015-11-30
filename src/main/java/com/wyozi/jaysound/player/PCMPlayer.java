@@ -8,6 +8,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * Basic PCM sound player using Java runtime (no LWJGL required)
+ *
  * @author Wyozi
  * @since 2.8.2015
  */
