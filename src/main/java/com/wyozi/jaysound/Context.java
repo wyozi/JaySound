@@ -12,11 +12,14 @@ import org.lwjgl.openal.*;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Wyozi
@@ -84,76 +87,62 @@ public class Context {
         ctx.destroy();
     }
 
-    private Decoder getDecoder(URL url) throws IOException {
+    private Decoder getDecoder(URL url, InputStream stream) throws IOException {
         if (url.getFile().endsWith(".ogg"))
-            return new OggDecoder(url.openStream());
-        return new MP3Decoder(url.openStream());
+            return new OggDecoder(stream);
+        return new MP3Decoder(stream);
     }
 
     public Sound createBufferedSound(URL url) throws IOException {
         BufferedSound sound = new BufferedSound();
-        sound.load(getDecoder(url));
+        sound.load(getDecoder(url, url.openStream()));
 
         sounds.add(sound);
         return sound;
     }
+
+
     public Sound createStreamingSound(URL url) throws IOException {
         StreamingSound sound = new StreamingSound();
-        sound.load(getDecoder(url));
+        sound.load(getDecoder(url, openStreamingSoundStream(url)));
 
         sounds.add(sound);
         return sound;
     }
 
-    private static class ThrowawayVec3f implements JayVec3f {
-
-        private final float x, y, z;
-
-        private ThrowawayVec3f(float x, float y, float z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        @Override
-        public float getJayX() {
-            return x;
-        }
-
-        @Override
-        public float getJayY() {
-            return y;
-        }
-
-        @Override
-        public float getJayZ() {
-            return z;
+    private InputStream openStreamingSoundStream(URL url) throws IOException {
+        // Some streams return ICY header which doesn't work with openStream()
+        // in those cases we open separate stream which accepts ICY headers
+        try {
+            return url.openStream();
+        } catch (IOException ex) {
+            return openICYStream(url);
         }
     }
-    public static void main(String[] args) throws InterruptedException, IOException {
-        Configurator.defaultConfig()
-                .formatPattern("{level}: {class}.{method}()\\t{message}")
-                .level(org.pmw.tinylog.Level.DEBUG)
-                .activate();
+    private InputStream openICYStream(URL url) throws IOException {
+        int port = url.getPort();
+        if (port == -1) port = 80;
 
-        Context ss = new Context();
-        ss.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
+        Socket sock = new Socket(url.getHost(), port);
 
-        Sound handle = ss.createStreamingSound(new URL("http://198.100.147.142:80/"));
-        handle.play();
+        PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
 
-        for (int i = 0;i < 50000; i++) {
-            float x = (float) (Math.cos(i/30f)*1.5f);
-            float z = (float) (Math.sin(i/30f)*1.5f);
-            handle.setPos(new ThrowawayVec3f(x, 0, z));
-            //ss.updateListener(new Vec3f(x, 0, z), new Vec3f(0, 0, 1), null);
-            //System.out.println(x + " x " + z);
+        String crlf = "\r\n";
+        pw.print("GET " + url.getPath() + " HTTP/1.0 " + crlf);
+        pw.print("Icy-MetaData:0 " + crlf);
+        pw.print(crlf);
+        pw.flush();
 
-            ss.update();
-            Thread.sleep(20);
+        InputStream in = sock.getInputStream();
+        BufferedReader bis = new BufferedReader(new InputStreamReader(in));
+
+        // Read all stupid headers
+        String line;
+        while (!(line = bis.readLine()).equals("")) {
+            Logger.debug("Received ICY header: " + line);
         }
 
-        handle.dispose();
-        ss.dispose();
+        // Now we should get some juicy sound data; pass stream to whoever wants it
+        return in;
     }
 }
