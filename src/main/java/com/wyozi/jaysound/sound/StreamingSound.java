@@ -3,8 +3,12 @@ package com.wyozi.jaysound.sound;
 import com.wyozi.jaysound.Context;
 import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.decoder.DecoderCallback;
+import com.wyozi.jaysound.decoder.DecoderUtils;
+import ddf.minim.analysis.FFT;
+import ddf.minim.analysis.FourierTransform;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
 import org.pmw.tinylog.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -17,10 +21,12 @@ import java.nio.*;
  */
 public class StreamingSound extends Sound {
     private final int STREAMING_BUFFER_COUNT = 2;
-    private final int STREAMING_BUFFER_SIZE = 48000;
 
     private int bufferIndex = 0;
     private final int[] buffers = new int[STREAMING_BUFFER_COUNT];
+
+    // TODO variable sizify
+    private final float[][] dataBuffers = new float[STREAMING_BUFFER_COUNT][200_000];
 
     public StreamingSound() {
         super();
@@ -31,7 +37,20 @@ public class StreamingSound extends Sound {
         Context.checkALError();
     }
 
+    // Zero-indexed index of currently playing buffer. Index can be used to index dataBuffers.
+    private int currentlyPlayingBuffer;
+
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    private byte[] readAndStoreData(int buffer) {
+        byte[] data = readRemainingData();
+
+        float[] floatData = new float[data.length / 2];
+        DecoderUtils.toNormalizedFloatArray(data, floatData);
+        dataBuffers[buffer - 2] = floatData;
+
+        return data;
+    }
 
     private volatile boolean hasSetupBuffers = false;
     private void setupBuffers() {
@@ -43,7 +62,7 @@ public class StreamingSound extends Sound {
                 } catch (InterruptedException ignored) {}
             }
 
-            readInto(buffers[i]);
+            readInto(buffers[i], readAndStoreData(buffers[i]));
             AL10.alSourceQueueBuffers(source, buffers[i]);
             Context.checkALError();
         }
@@ -56,13 +75,16 @@ public class StreamingSound extends Sound {
         super.update();
 
         if (!hasSetupBuffers) {
+            // TODO add a timeout
             setupBuffers();
         }
 
         int processed = AL10.alGetSourcei(source, AL10.AL_BUFFERS_PROCESSED);
         while (processed > 0 && hasSomeData()) {
             int buffer = AL10.alSourceUnqueueBuffers(source);
-            readInto(buffer);
+            currentlyPlayingBuffer = buffer == 3 ? 0 : 1;
+
+            readInto(buffer, readAndStoreData(buffer));
             AL10.alSourceQueueBuffers(source, buffer);
 
             processed--;
@@ -72,6 +94,27 @@ public class StreamingSound extends Sound {
             this.play();
             playAsap = false;
         }
+    }
+
+    private final float[] tmpFft = new float[512];
+    private FFT fft;
+
+    public FFT getFft() {
+        return fft;
+    }
+
+    public float[] fft() {
+        int curSample = AL10.alGetSourcei(source, AL11.AL_SAMPLE_OFFSET);
+        float[] dats = this.dataBuffers[this.currentlyPlayingBuffer];
+
+        int remaining = dats.length-curSample-1;
+        if (remaining > 0) {
+            System.arraycopy(dats, curSample, tmpFft, 0, Math.min(512, remaining));
+        }
+        // TODO copy remaining tmpFft samples from the other buffer's dataBuffers entry
+
+        this.fft.forward(tmpFft);
+        return this.tmpFft;
     }
 
     private volatile boolean playAsap = false;
@@ -110,17 +153,20 @@ public class StreamingSound extends Sound {
         }).start();
     }
 
-    public boolean hasSomeData() {
+    private boolean hasSomeData() {
         return baos.size() > 0;
     }
 
-    private void readInto(int buffer) {
+    private byte[] readRemainingData() {
         byte[] data;
         synchronized (baos) {
             data = baos.toByteArray();
             baos.reset();
         }
+        return data;
+    }
 
+    private void readInto(int buffer, byte[] data) {
         ByteBuffer bdata;
         if (channels > 1) {
             // Two targetChannelCount compressed into one means two times less data
@@ -161,6 +207,9 @@ public class StreamingSound extends Sound {
     private void setup(int rate, int channels) {
         this.rate = rate;
         this.channels = channels;
+
+        this.fft = new FFT(512, rate);
+        this.fft.window(FourierTransform.HAMMING);
 
         hasSetup = true;
     }

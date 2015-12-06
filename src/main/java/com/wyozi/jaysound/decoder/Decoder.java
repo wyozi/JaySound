@@ -82,10 +82,7 @@ public abstract class Decoder {
     }
 
     private int internalReadShorts(byte[] sourceBuffer, short[] targetBuffer) {
-        ShortBuffer sbuf = ByteBuffer.wrap(tmpByte, 0, targetBuffer.length * 2).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-        int shortCap = sbuf.capacity();
-        sbuf.get(targetBuffer);
-        return shortCap;
+        return DecoderUtils.toShortArray(sourceBuffer, targetBuffer);
     }
 
     public int readShorts(short[] shortBuffer) throws IOException {
@@ -101,9 +98,7 @@ public abstract class Decoder {
     }
 
     private void internalReadNormFloats(short[] sourceBuffer, float[] floatBuffer) {
-        for (int i = 0; i < sourceBuffer.length; i++) {
-            floatBuffer[i] = ((float) sourceBuffer[i]) / 0x8000;
-        }
+        DecoderUtils.toNormalizedFloatArray(sourceBuffer, floatBuffer);
     }
 
     /**

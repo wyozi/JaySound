@@ -1,7 +1,9 @@
 package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.adapter.JayVec3f;
+import com.wyozi.jaysound.player.FFTVisualizer;
 import com.wyozi.jaysound.sound.Sound;
+import com.wyozi.jaysound.sound.StreamingSound;
 import org.pmw.tinylog.Configurator;
 
 import java.io.IOException;
@@ -45,17 +47,22 @@ public class ALStreamTest {
         Context ss = new Context();
         ss.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
-        //Sound handle = ss.createStreamingSound(new URL("http://stream.plusfm.net/"));
-        Sound handle = ss.createStreamingSound(Mp3DecoderTest.class.getResource("/higher.mp3"));
+        StreamingSound handle = ss.createStreamingSound(new URL("http://streaming.radionomy.com/DRIVE"));
+        //Sound handle = ss.createStreamingSound(Mp3DecoderTest.class.getResource("/higher.mp3"));
         handle.play();
 
+        FFTVisualizer fftVisualizer = new FFTVisualizer();
+
         for (int i = 0;i < 50000; i++) {
-            float x = (float) (Math.cos(i/30f)*1.5f);
-            float z = (float) (Math.sin(i/30f)*1.5f);
+            float x = 3f, z = 5f;
+            //float x = (float) (Math.cos(i/30f)*1.5f);
+            //float z = (float) (Math.sin(i/30f)*1.5f);
             handle.setPos(new ThrowawayVec3f(x, 0, z));
             //ss.updateListener(new Vec3f(x, 0, z), new Vec3f(0, 0, 1), null);
 
             ss.update();
+            handle.fft();
+            fftVisualizer.updateFFT(handle.getFft());
             Thread.sleep(20);
         }
 

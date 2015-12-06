@@ -9,17 +9,13 @@ import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.*;
-import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Logger;
 
 import java.io.*;
-import java.net.Socket;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Wyozi
@@ -101,7 +97,7 @@ public class Context {
         return sound;
     }
 
-    public Sound createStreamingSound(URL url) throws IOException {
+    public StreamingSound createStreamingSound(URL url) throws IOException {
         StreamingSound sound = new StreamingSound();
         sound.load(getDecoder(url, StreamLoader.openStreamingSoundStream(url)));
 

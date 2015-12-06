@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Wyozi
  * @since 2.8.2015
  */
+@Deprecated
 public class PCMPlayer implements DecoderCallback {
     private int rate, channels;
 
