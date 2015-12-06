@@ -47,8 +47,8 @@ public class ALStreamTest {
         Context ss = new Context();
         ss.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
-        StreamingSound handle = ss.createStreamingSound(new URL("http://streaming.radionomy.com/DRIVE"));
-        //Sound handle = ss.createStreamingSound(Mp3DecoderTest.class.getResource("/higher.mp3"));
+        //StreamingSound handle = ss.createStreamingSound(new URL("http://streaming.radionomy.com/DRIVE"));
+        StreamingSound handle = ss.createStreamingSound(Mp3DecoderTest.class.getResource("/higher.mp3"));
         handle.play();
 
         FFTVisualizer fftVisualizer = new FFTVisualizer();

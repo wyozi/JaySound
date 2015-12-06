@@ -20,6 +20,8 @@ import java.nio.*;
  * @since 2.8.2015
  */
 public class StreamingSound extends Sound {
+    private final int FFT_SIZE = 512;
+
     private final int STREAMING_BUFFER_COUNT = 2;
 
     private int bufferIndex = 0;
@@ -37,8 +39,19 @@ public class StreamingSound extends Sound {
         Context.checkALError();
     }
 
-    // Zero-indexed index of currently playing buffer. Index can be used to index dataBuffers.
-    private int currentlyPlayingBuffer;
+    /**
+     * OpenAL Buffer id to local zero-indexed buffer id.
+     * @param openal
+     * @return
+     */
+    private int openALBufferToZeroIndex(int openal) {
+        for (int i = 0;i < buffers.length; i++) {
+            if (buffers[i] == openal) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -82,7 +95,6 @@ public class StreamingSound extends Sound {
         int processed = AL10.alGetSourcei(source, AL10.AL_BUFFERS_PROCESSED);
         while (processed > 0 && hasSomeData()) {
             int buffer = AL10.alSourceUnqueueBuffers(source);
-            currentlyPlayingBuffer = buffer == 3 ? 0 : 1;
 
             readInto(buffer, readAndStoreData(buffer));
             AL10.alSourceQueueBuffers(source, buffer);
@@ -96,7 +108,7 @@ public class StreamingSound extends Sound {
         }
     }
 
-    private final float[] tmpFft = new float[512];
+    private final float[] tmpFft = new float[FFT_SIZE];
     private FFT fft;
 
     public FFT getFft() {
@@ -104,14 +116,29 @@ public class StreamingSound extends Sound {
     }
 
     public float[] fft() {
+        int curBuffer = AL10.alGetSourcei(source, AL10.AL_BUFFER);
         int curSample = AL10.alGetSourcei(source, AL11.AL_SAMPLE_OFFSET);
-        float[] dats = this.dataBuffers[this.currentlyPlayingBuffer];
+        int curBufferLocal = openALBufferToZeroIndex(curBuffer);
 
-        int remaining = dats.length-curSample-1;
-        if (remaining > 0) {
-            System.arraycopy(dats, curSample, tmpFft, 0, Math.min(512, remaining));
+        // If not playing return early
+        if (curBufferLocal == -1) {
+            return tmpFft; // TODO return something nicer
         }
-        // TODO copy remaining tmpFft samples from the other buffer's dataBuffers entry
+
+        float[] curBufferData = this.dataBuffers[curBufferLocal];
+
+        int remaining = curBufferData.length-curSample-1;
+        if (remaining > 0) {
+            int length = Math.min(FFT_SIZE, remaining);
+            System.arraycopy(curBufferData, curSample, tmpFft, 0, length);
+
+            // If we're nearing current buffer's end fetch some samples from the other buffer
+            if (remaining < FFT_SIZE) {
+                int samplesNeeded = FFT_SIZE - remaining;
+                float[] otherBufferData = this.dataBuffers[1 - curBufferLocal];
+                System.arraycopy(otherBufferData, 0, tmpFft, length, samplesNeeded);
+            }
+        }
 
         this.fft.forward(tmpFft);
         return this.tmpFft;
