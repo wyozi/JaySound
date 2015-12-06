@@ -37,9 +37,10 @@ public class StreamingSound extends Sound {
     private void setupBuffers() {
         // Queue all buffers
         for (int i = 0;i < buffers.length; i++) {
-            // TODO this is terrible, lol
             while (!hasSomeData()) {
-                Thread.yield();
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ignored) {}
             }
 
             readInto(buffers[i]);
@@ -122,7 +123,7 @@ public class StreamingSound extends Sound {
 
         ByteBuffer bdata;
         if (channels > 1) {
-            // Two channels compressed into one means two times less data
+            // Two targetChannelCount compressed into one means two times less data
             bdata = ByteBuffer.allocateDirect(data.length / 2).order(ByteOrder.LITTLE_ENDIAN);
 
             ByteBuffer wrapped = ByteBuffer.wrap(data);
@@ -149,7 +150,7 @@ public class StreamingSound extends Sound {
         AL10.alBufferData(
                 buffer,
                 AL10.AL_FORMAT_MONO16,
-                //channels > 1 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
+                //targetChannelCount > 1 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
                 bdata,
                 rate);
         Context.checkALError();
@@ -169,19 +170,18 @@ public class StreamingSound extends Sound {
     }
 
     private void loadInternal(Decoder decoder) throws IOException {
-        decoder.readFully(new DecoderCallback() {
-            @Override
-            public void writePCM(byte[] data, int offset, int length) {
-                synchronized (baos) {
-                    baos.write(data, offset, length);
-                }
-            }
+        // Note: things seem to break if you pass stereo data to baos, so we read
+        // everything as mono in here.
 
-            @Override
-            public void inform(int channels, int rate) {
-                setup(rate, channels);
+        setup(decoder.getSampleRate(), 1);
+
+        byte[] data = new byte[1024];
+        int read;
+        while ((read = decoder.readMono(data, 0, data.length)) != -1) {
+            synchronized (baos) {
+                baos.write(data, 0, read);
             }
-        });
+        }
     }
 
 

@@ -95,54 +95,17 @@ public class Context {
 
     public Sound createBufferedSound(URL url) throws IOException {
         BufferedSound sound = new BufferedSound();
-        sound.load(getDecoder(url, url.openStream()));
+        sound.load(getDecoder(url, StreamLoader.openStreamingSoundStream(url)));
 
         sounds.add(sound);
         return sound;
     }
-
 
     public Sound createStreamingSound(URL url) throws IOException {
         StreamingSound sound = new StreamingSound();
-        sound.load(getDecoder(url, openStreamingSoundStream(url)));
+        sound.load(getDecoder(url, StreamLoader.openStreamingSoundStream(url)));
 
         sounds.add(sound);
         return sound;
-    }
-
-    private InputStream openStreamingSoundStream(URL url) throws IOException {
-        // Some streams return ICY header which doesn't work with openStream()
-        // in those cases we open separate stream which accepts ICY headers
-        try {
-            return url.openStream();
-        } catch (IOException ex) {
-            return openICYStream(url);
-        }
-    }
-    private InputStream openICYStream(URL url) throws IOException {
-        int port = url.getPort();
-        if (port == -1) port = 80;
-
-        Socket sock = new Socket(url.getHost(), port);
-
-        PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
-
-        String crlf = "\r\n";
-        pw.print("GET " + url.getPath() + " HTTP/1.0 " + crlf);
-        pw.print("Icy-MetaData:0 " + crlf);
-        pw.print(crlf);
-        pw.flush();
-
-        InputStream in = sock.getInputStream();
-        BufferedReader bis = new BufferedReader(new InputStreamReader(in));
-
-        // Read all stupid headers
-        String line;
-        while (!(line = bis.readLine()).equals("")) {
-            Logger.debug("Received ICY header: " + line);
-        }
-
-        // Now we should get some juicy sound data; pass stream to whoever wants it
-        return in;
     }
 }
