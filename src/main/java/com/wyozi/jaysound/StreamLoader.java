@@ -5,6 +5,7 @@ import org.pmw.tinylog.Logger;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Utilities for getting input stream of audio data from an URL.
@@ -16,7 +17,9 @@ public class StreamLoader {
         // Some streams return ICY header which doesn't work with openStream()
         // in those cases we open separate stream which accepts ICY headers
         try {
-            return url.openStream();
+            URLConnection connection = url.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+            return connection.getInputStream();
         } catch (IOException ex) {
             return openICYStream(url);
         }

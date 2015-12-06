@@ -2,11 +2,9 @@ package com.wyozi.jaysound.sound;
 
 import com.wyozi.jaysound.Context;
 import com.wyozi.jaysound.decoder.Decoder;
-import com.wyozi.jaysound.decoder.DecoderCallback;
 import com.wyozi.jaysound.decoder.DecoderUtils;
 import ddf.minim.analysis.FFT;
 import ddf.minim.analysis.FourierTransform;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 import org.pmw.tinylog.Logger;
@@ -69,7 +67,7 @@ public class StreamingSound extends Sound {
     private void setupBuffers() {
         // Queue all buffers
         for (int i = 0;i < buffers.length; i++) {
-            while (!hasSomeData()) {
+            while (!hasEnoughData()) {
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException ignored) {}
@@ -93,7 +91,7 @@ public class StreamingSound extends Sound {
         }
 
         int processed = AL10.alGetSourcei(source, AL10.AL_BUFFERS_PROCESSED);
-        while (processed > 0 && hasSomeData()) {
+        while (processed > 0 && hasEnoughData()) {
             int buffer = AL10.alSourceUnqueueBuffers(source);
 
             readInto(buffer, readAndStoreData(buffer));
@@ -171,17 +169,19 @@ public class StreamingSound extends Sound {
         AL10.alSourcef(source, AL10.AL_GAIN, 1.0f);
         Context.checkALError();
 
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             try {
                 loadInternal(decoder);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
-    private boolean hasSomeData() {
-        return baos.size() > 0;
+    private boolean hasEnoughData() {
+        return baos.size() > 10*1024;
     }
 
     private byte[] readRemainingData() {
