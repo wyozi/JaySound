@@ -127,7 +127,21 @@ public abstract class Decoder {
         return read;
     }
 
-    public abstract void readFully(DecoderCallback callback) throws IOException;
+    /**
+     * @param callback
+     * @throws IOException
+     * @deprecated use read() methods instead
+     */
+    @Deprecated
+    public void readFully(DecoderCallback callback) throws IOException {
+        callback.inform(this.channelCount, this.sampleRate);
+
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = this.read(buffer, 0, 1024)) != -1) {
+            callback.writePCM(buffer, 0, read);
+        }
+    }
 
     public static class Settings {
     }

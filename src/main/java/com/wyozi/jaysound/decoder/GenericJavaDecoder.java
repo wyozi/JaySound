@@ -63,15 +63,4 @@ public class GenericJavaDecoder extends Decoder {
     public int read(byte[] buffer, int offset, int length) throws IOException {
         return this.audioIn.read(buffer, offset, length);
     }
-
-    @Override
-    public void readFully(DecoderCallback callback) throws IOException {
-        callback.inform(this.channelCount, this.sampleRate);
-
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = this.read(buffer, 0, 1024)) != -1) {
-            callback.writePCM(buffer, 0, read);
-        }
-    }
 }
