@@ -15,14 +15,32 @@ public abstract class Sound {
         this.source = AL10.alGenSources();
     }
 
+    /**
+     * Whether sound should be playing or not.
+     */
+    protected boolean targetPlayState = false;
+
     public void play() {
         AL10.alSourcePlay(source);
+        targetPlayState = true;
     }
     public void pause() {
         AL10.alSourcePause(source);
+        targetPlayState = false;
     }
 
-    public void update() {}
+    public void update() {
+        // Sets source state if it's not what we want
+        // Especially big cases where this happens are play() before loading any sound data or streaming sound
+        //      not loading enough data.
+        // TODO find a better way to do this (that does not require query and allows more states)
+        if ((AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) != targetPlayState) {
+            if (targetPlayState)
+                play();
+            else
+                pause();
+        }
+    }
 
     public void setPos(JayVec3f pos) {
         AL10.alSource3f(source, AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());

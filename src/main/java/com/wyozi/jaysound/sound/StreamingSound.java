@@ -99,11 +99,6 @@ public class StreamingSound extends Sound {
 
             processed--;
         }
-
-        if (playAsap) {
-            this.play();
-            playAsap = false;
-        }
     }
 
     private final float[] tmpFft = new float[FFT_SIZE];
@@ -140,24 +135,6 @@ public class StreamingSound extends Sound {
 
         this.fft.forward(tmpFft);
         return this.tmpFft;
-    }
-
-    private volatile boolean playAsap = false;
-    public void play() {
-        if (!hasSetupBuffers) {
-            playAsap = true;
-            return;
-        }
-
-        AL10.alSourcePlay(source);
-    }
-    public void pause() {
-        if (!hasSetupBuffers) {
-            playAsap = false;
-            return;
-        }
-
-        AL10.alSourcePause(source);
     }
 
     public void load(Decoder decoder) throws IOException {
