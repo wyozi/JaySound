@@ -1,8 +1,9 @@
 package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.adapter.JayVec3f;
+import com.wyozi.jaysound.efx.EffectZone;
+import com.wyozi.jaysound.efx.effects.*;
 import com.wyozi.jaysound.player.FFTVisualizer;
-import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
 import org.pmw.tinylog.Configurator;
 
@@ -47,16 +48,20 @@ public class ALStreamTest {
         Context ss = new Context();
         ss.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
-        StreamingSound handle = ss.createStreamingSound(new URL("http://178.63.62.145/;stream.mp3"));
+        EffectZone zone = new EffectZone();
+        zone.addEffect(new Echo());
+        zone.addEffect(new Flanger());
+        ss.setGlobalEffectZone(zone);
+
+        StreamingSound handle = ss.createStreamingSound(new URL("http://wyozi.party:8080/f/Bank%20Head%20-%20Kingdom%20ft.%20Kelela.mp3"));
         //StreamingSound handle = ss.createStreamingSound(Mp3DecoderTest.class.getResource("/higher.mp3"));
         handle.play();
 
         FFTVisualizer fftVisualizer = new FFTVisualizer();
 
         for (int i = 0;i < 50000; i++) {
-            float x = 3f, z = 5f;
-            //float x = (float) (Math.cos(i/30f)*1.5f);
-            //float z = (float) (Math.sin(i/30f)*1.5f);
+            float x = (float) (Math.cos(i/30f)*1.5f);
+            float z = (float) (Math.sin(i/30f)*1.5f);
             handle.setPos(new ThrowawayVec3f(x, 0, z));
             //ss.updateListener(new Vec3f(x, 0, z), new Vec3f(0, 0, 1), null);
 

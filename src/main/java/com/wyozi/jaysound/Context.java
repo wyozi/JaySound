@@ -4,6 +4,7 @@ import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.decoder.MP3Decoder;
 import com.wyozi.jaysound.decoder.OggDecoder;
+import com.wyozi.jaysound.efx.EffectZone;
 import com.wyozi.jaysound.sound.BufferedSound;
 import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
@@ -35,6 +36,8 @@ public class Context {
         Logger.debug("Available devices: '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_DEVICE_SPECIFIER));
         Logger.debug("Available extensions: '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_EXTENSIONS));
 
+        Logger.debug("EFX Support: {}", EFXUtil.isEfxSupported());
+
         /*ALCapabilities caps = ctx.getCapabilities();
         System.out.println("OpenAL Capabilities:");
         for (Field f : caps.getClass().getDeclaredFields()) {
@@ -54,6 +57,16 @@ public class Context {
     }
 
     private List<Sound> sounds = new ArrayList<>();
+
+    private EffectZone globalEffectZone;
+
+    public void setGlobalEffectZone(EffectZone zone) {
+        this.globalEffectZone = zone;
+
+        for (Sound sound : sounds) {
+            sound.connectToEffectZone(this.globalEffectZone);
+        }
+    }
 
     /**
      * Streaming sounds require some plumbing to be done in the main OpenAL thread. Call this method to do the plumbing.
@@ -89,11 +102,19 @@ public class Context {
         return new MP3Decoder(stream);
     }
 
+    protected void onNewSoundCreated(Sound sound) {
+        if (this.globalEffectZone != null)
+            sound.connectToEffectZone(this.globalEffectZone);
+
+        sounds.add(sound);
+    }
+
     public Sound createBufferedSound(URL url) throws IOException {
         BufferedSound sound = new BufferedSound();
         sound.load(getDecoder(url, StreamLoader.openStreamingSoundStream(url)));
 
-        sounds.add(sound);
+        onNewSoundCreated(sound);
+
         return sound;
     }
 
@@ -101,7 +122,8 @@ public class Context {
         StreamingSound sound = new StreamingSound();
         sound.load(getDecoder(url, StreamLoader.openStreamingSoundStream(url)));
 
-        sounds.add(sound);
+        onNewSoundCreated(sound);
+
         return sound;
     }
 }

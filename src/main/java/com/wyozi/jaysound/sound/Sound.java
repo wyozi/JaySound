@@ -2,7 +2,10 @@ package com.wyozi.jaysound.sound;
 
 import com.wyozi.jaysound.Context;
 import com.wyozi.jaysound.adapter.JayVec3f;
+import com.wyozi.jaysound.efx.EffectZone;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
+import org.lwjgl.openal.EXTEfx;
 
 /**
  * @author Wyozi
@@ -80,5 +83,9 @@ public abstract class Sound {
     public void dispose() {
         AL10.alDeleteSources(source);
         Context.checkALError();
+    }
+
+    public void connectToEffectZone(EffectZone zone) {
+        zone.connectALSource(this.source);
     }
 }
