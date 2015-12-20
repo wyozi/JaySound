@@ -53,12 +53,16 @@ public class StreamingSound extends Sound {
 
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
+    /**
+     * Reads remaining buffered data and returns it.
+     * Also stores the data for internal use.
+     */
     private byte[] readAndStoreData(int buffer) {
         byte[] data = readRemainingData();
 
         float[] floatData = new float[data.length / 2];
         DecoderUtils.toNormalizedFloatArray(data, floatData);
-        dataBuffers[buffer - 2] = floatData;
+        dataBuffers[openALBufferToZeroIndex(buffer)] = floatData;
 
         return data;
     }
