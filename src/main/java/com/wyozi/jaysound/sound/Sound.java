@@ -72,6 +72,11 @@ public abstract class Sound {
         Context.checkALError();
     }
 
+    public void setPitch(float v) {
+        AL10.alSourcef(source, AL10.AL_PITCH, v);
+        Context.checkALError();
+    }
+
     public void dispose() {
         AL10.alDeleteSources(source);
         Context.checkALError();

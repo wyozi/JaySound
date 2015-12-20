@@ -143,11 +143,9 @@ public class StreamingSound extends Sound {
 
     public void load(Decoder decoder) throws IOException {
         AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, 1f);
-        AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, 2f);
-        AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 0.7f); // exponential
+        //AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, 2f);
+        AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 1.5f);
 
-        AL10.alSourcef(source, AL10.AL_PITCH, 1.0f);
-        AL10.alSourcef(source, AL10.AL_GAIN, 1.0f);
         Context.checkALError();
 
         Thread thread = new Thread(() -> {

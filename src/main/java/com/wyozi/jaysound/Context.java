@@ -50,7 +50,7 @@ public class Context {
 
         checkALError();
 
-        AL10.alDistanceModel(AL11.AL_EXPONENT_DISTANCE);
+        AL10.alDistanceModel(AL10.AL_INVERSE_DISTANCE);
     }
 
     private List<Sound> sounds = new ArrayList<>();
