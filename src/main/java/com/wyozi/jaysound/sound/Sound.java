@@ -60,6 +60,35 @@ public abstract class Sound {
         Context.checkALError();
     }
 
+    /**
+     * Sets the attenuation rolloff parameters for this sound.
+     *
+     * @param minDistance distance where gain is maximum
+     * @param halfGainDistance distance at which gain is 50% of minDistance's gain.
+     */
+    public void setRolloff(float minDistance, float halfGainDistance) {
+        // TODO dynamically figure out which model we're using
+        setInverseDistanceRolloff(minDistance, halfGainDistance);
+    }
+
+    /**
+     * <code>
+     *     gain = AL_REFERENCE_DISTANCE / (AL_REFERENCE_DISTANCE + AL_ROLLOFF_FACTOR * (distance – AL_REFERENCE_DISTANCE));
+     * </code>
+     * @param minDistance
+     * @param halfGainDistance
+     */
+    private void setInverseDistanceRolloff(float minDistance, float halfGainDistance) {
+        AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, minDistance);
+
+        /*
+        Rolloff can be calculated by solving the inverse distance rolloff model equation for rolloff when gain is 0 and distance is halfGainDistance
+         */
+        // Note: to prevent infinities rolloff is calculated for when gain is 0.01 rather than zero
+        float rolloff = (minDistance) / (halfGainDistance - minDistance);
+        AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, rolloff);
+    }
+
     public void setCone(float inner, float outer) {
         AL10.alSourcef(source, AL10.AL_CONE_INNER_ANGLE, inner);
         AL10.alSourcef(source, AL10.AL_CONE_OUTER_ANGLE, outer);

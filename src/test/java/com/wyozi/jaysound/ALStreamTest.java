@@ -14,31 +14,6 @@ import java.net.URL;
  * Created by wyozi on 30.11.2015.
  */
 public class ALStreamTest {
-    private static class ThrowawayVec3f implements JayVec3f {
-
-        private final float x, y, z;
-
-        private ThrowawayVec3f(float x, float y, float z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        @Override
-        public float getJayX() {
-            return x;
-        }
-
-        @Override
-        public float getJayY() {
-            return y;
-        }
-
-        @Override
-        public float getJayZ() {
-            return z;
-        }
-    }
     public static void main(String[] args) throws InterruptedException, IOException {
         Configurator.defaultConfig()
                 .formatPattern("{level}: {class}.{method}()\\t{message}")
