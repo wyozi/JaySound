@@ -2,9 +2,7 @@ package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.buffer.StreamBuffer;
 import com.wyozi.jaysound.decoder.MP3Decoder;
-import com.wyozi.jaysound.efx.EffectZone;
-import com.wyozi.jaysound.efx.effects.Echo;
-import com.wyozi.jaysound.sound.StreamingSound2;
+import com.wyozi.jaysound.sound.StreamingSound;
 import org.pmw.tinylog.Configurator;
 
 import java.io.IOException;
@@ -20,21 +18,20 @@ public class StreamBufferTest {
                 .level(org.pmw.tinylog.Level.DEBUG)
                 .activate();
 
-        Context context = new Context();
+        AudioContext context = new AudioContext();
 
         context.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
         StreamBuffer buf = new StreamBuffer(new MP3Decoder(StreamLoader.openSoundStream(new URL("http://stream.plusfm.net/;"))), true);
-        StreamingSound2 sound2 = new StreamingSound2(buf);
-        sound2.setRolloff(0.7f, 1.3f);
+        StreamingSound sound2 = new StreamingSound(buf);
+        //sound2.setRolloff(0.7f, 1.3f);
         sound2.play();
 
         for (int i = 0;i < 50000; i++) {
             float x = (float) (Math.cos(i/30f)*1f);
             float z = (float) (Math.sin(i/30f)*1.5f);
-            sound2.setPos(new ThrowawayVec3f(x, 0, z));
+            //sound2.setPos(new ThrowawayVec3f(x, 0, z));
 
-            buf.update();
             sound2.update();
             Thread.sleep(20);
         }

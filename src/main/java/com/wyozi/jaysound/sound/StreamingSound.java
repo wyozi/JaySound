@@ -1,252 +1,64 @@
 package com.wyozi.jaysound.sound;
 
-import com.wyozi.jaysound.Context;
-import com.wyozi.jaysound.decoder.Decoder;
-import com.wyozi.jaysound.decoder.DecoderUtils;
-import ddf.minim.analysis.FFT;
-import ddf.minim.analysis.FourierTransform;
+import com.wyozi.jaysound.buffer.StreamBuffer;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.AL11;
 import org.pmw.tinylog.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * @author Wyozi
- * @since 2.8.2015
+ * Created by wyozi on 22.12.2015.
  */
 public class StreamingSound extends Sound {
-    private final int FFT_SIZE = 512;
+    private final StreamBuffer streamBuffer;
 
-    private final int STREAMING_BUFFER_COUNT = 2;
-
-    private int bufferIndex = 0;
-    private final int[] buffers = new int[STREAMING_BUFFER_COUNT];
-
-    // TODO variable sizify
-    private final float[][] dataBuffers = new float[STREAMING_BUFFER_COUNT][200_000];
-
-    public StreamingSound() {
-        super(null);
-
-        for (int i = 0;i < buffers.length; i++) {
-            buffers[i] = AL10.alGenBuffers();
-        }
-        Context.checkALError();
-    }
-
-    /**
-     * OpenAL Buffer id to local zero-indexed buffer id.
-     * @param openal
-     * @return
-     */
-    private int openALBufferToZeroIndex(int openal) {
-        for (int i = 0;i < buffers.length; i++) {
-            if (buffers[i] == openal) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-    /**
-     * Reads remaining buffered data and returns it.
-     * Also stores the data for internal use.
-     */
-    private byte[] readAndStoreData(int buffer) {
-        byte[] data = readRemainingData();
-
-        float[] floatData = new float[data.length / 2];
-        DecoderUtils.toNormalizedFloatArray(data, floatData);
-        dataBuffers[openALBufferToZeroIndex(buffer)] = floatData;
-
-        return data;
-    }
-
-    private volatile boolean hasSetupBuffers = false;
-    private void setupBuffers() {
-        // Queue all buffers
-        for (int i = 0;i < buffers.length; i++) {
-            while (!hasEnoughData()) {
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException ignored) {}
-            }
-
-            readInto(buffers[i], readAndStoreData(buffers[i]));
-            AL10.alSourceQueueBuffers(source, buffers[i]);
-            Context.checkALError();
-        }
-
-        hasSetupBuffers = true;
+    public StreamingSound(StreamBuffer buffer) {
+        super(buffer);
+        this.streamBuffer = buffer;
+        this.streamBuffer.registerSound(this);
     }
 
     @Override
     public void update() {
         super.update();
 
-        if (!hasSetupBuffers) {
-            // TODO add a timeout
-            setupBuffers();
-        }
+        // TODO buffer shouldn't be updated here when there are multiple sounds using same buffer
+        this.streamBuffer.update();
+    }
 
+    /**
+     * @return OpenAL index of the oldest processed buffer. -1 if no buffers have been processed.
+     */
+    public int getProcessedBuffer() {
         int processed = AL10.alGetSourcei(source, AL10.AL_BUFFERS_PROCESSED);
-        while (processed > 0 && hasEnoughData()) {
-            int buffer = AL10.alSourceUnqueueBuffers(source);
-
-            readInto(buffer, readAndStoreData(buffer));
-            AL10.alSourceQueueBuffers(source, buffer);
-
-            processed--;
+        if (processed > 0) {
+            return AL10.alSourceUnqueueBuffers(source);
         }
+        return -1;
     }
 
-    private final float[] tmpFft = new float[FFT_SIZE];
-    private FFT fft;
+    private boolean initialSoundQueued = false;
 
-    public FFT getFft() {
-        return fft;
+    public boolean isInitialSoundQueued() {
+        return initialSoundQueued;
     }
 
-    public float[] fft() {
-        int curBuffer = AL10.alGetSourcei(source, AL10.AL_BUFFER);
-        int curSample = AL10.alGetSourcei(source, AL11.AL_SAMPLE_OFFSET);
-        int curBufferLocal = openALBufferToZeroIndex(curBuffer);
+    private Set<Integer> buffersInRotation = new HashSet<>();
 
-        // If not playing return early
-        if (curBufferLocal == -1) {
-            return tmpFft; // TODO return something nicer
-        }
-
-        float[] curBufferData = this.dataBuffers[curBufferLocal];
-
-        int remaining = curBufferData.length-curSample-1;
-        if (remaining > 0) {
-            int length = Math.min(FFT_SIZE, remaining);
-            System.arraycopy(curBufferData, curSample, tmpFft, 0, length);
-
-            // If we're nearing current buffer's end fetch some samples from the other buffer
-            if (remaining < FFT_SIZE) {
-                int samplesNeeded = FFT_SIZE - remaining;
-                float[] otherBufferData = this.dataBuffers[1 - curBufferLocal];
-                System.arraycopy(otherBufferData, 0, tmpFft, length, samplesNeeded);
-            }
-        }
-
-        this.fft.forward(tmpFft);
-        return this.tmpFft;
+    public Set<Integer> getBuffersInRotation() {
+        return buffersInRotation;
     }
 
-    public void load(Decoder decoder) throws IOException {
-        AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, 1f);
-        //AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, 2f);
-        AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 1.5f);
-
-        Context.checkALError();
-
-        Thread thread = new Thread(() -> {
-            try {
-                loadInternal(decoder);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
+    public int getBuffersInRotationCount() {
+        return buffersInRotation.size();
     }
 
-    private boolean hasEnoughData() {
-        return baos.size() > 10*1024;
-    }
+    public void queueBuffer(int bufferId) {
+        AL10.alSourceQueueBuffers(source, bufferId);
+        if (!buffersInRotation.contains(bufferId)) buffersInRotation.add(bufferId);
+        initialSoundQueued = true;
 
-    private byte[] readRemainingData() {
-        byte[] data;
-        synchronized (baos) {
-            data = baos.toByteArray();
-            baos.reset();
-        }
-        return data;
-    }
-
-    private void readInto(int buffer, byte[] data) {
-        ByteBuffer bdata;
-        if (channels > 1) {
-            // Two targetChannelCount compressed into one means two times less data
-            bdata = ByteBuffer.allocateDirect(data.length / 2).order(ByteOrder.LITTLE_ENDIAN);
-
-            ByteBuffer wrapped = ByteBuffer.wrap(data);
-            wrapped.order(ByteOrder.LITTLE_ENDIAN);
-
-            float gain = (float) Math.pow(10.0f, (-6.0f / 20.0f));
-            for (int i = 0;i < bdata.capacity()/2; i++) {
-                short channel1 = wrapped.getShort();
-                short channel2 = wrapped.getShort();
-
-                int combined = (int) ((channel1 + channel2) * gain);
-
-                bdata.putShort((short) combined);
-            }
-            bdata.rewind();
-        } else {
-            bdata = ByteBuffer.allocateDirect(data.length);
-            bdata.put(data);
-            bdata.rewind();
-        }
-
-        Logger.debug("Writing {} bytes of delicious PCM data into buffer #{}", bdata.capacity(), buffer);
-
-        AL10.alBufferData(
-                buffer,
-                AL10.AL_FORMAT_MONO16,
-                //targetChannelCount > 1 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
-                bdata,
-                rate);
-        Context.checkALError();
-    }
-
-    private int rate, channels;
-    private volatile boolean hasSetup = false;
-    private void setup(int rate, int channels) {
-        this.rate = rate;
-        this.channels = channels;
-
-        this.fft = new FFT(512, rate);
-        this.fft.window(FourierTransform.HAMMING);
-
-        hasSetup = true;
-    }
-
-    public boolean hasSetup() {
-        return this.hasSetup;
-    }
-
-    private void loadInternal(Decoder decoder) throws IOException {
-        // Note: things seem to break if you pass stereo data to baos, so we read
-        // everything as mono in here.
-
-        setup(decoder.getSampleRate(), 1);
-
-        byte[] data = new byte[1024];
-        int read;
-        while ((read = decoder.readMono(data, 0, data.length)) != -1) {
-            synchronized (baos) {
-                baos.write(data, 0, read);
-            }
-        }
-    }
-
-
-    @Override
-    public void dispose() {
-        super.dispose();
-
-        for (int i = 0;i < buffers.length; i++) {
-            AL10.alDeleteBuffers(buffers[i]);
-        }
-        Context.checkALError();
+        Logger.debug("Stream buffer {} queued", bufferId);
     }
 }

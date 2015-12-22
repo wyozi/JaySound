@@ -1,16 +1,13 @@
 package com.wyozi.jaysound.buffer;
 
-import com.wyozi.jaysound.Context;
+import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.decoder.Decoder;
-import com.wyozi.jaysound.util.MonofierOutputStream;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 import org.pmw.tinylog.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -38,7 +35,12 @@ public class StaticBuffer extends Buffer {
                 bdata,
                 this.sampleRate);
 
-        Context.checkALError();
+        AudioContext.checkALError();
+    }
+
+    @Override
+    public byte[] getBufferData(int openalId) {
+        return this.data;
     }
 
     private byte[] decode(Decoder decoder) throws IOException {

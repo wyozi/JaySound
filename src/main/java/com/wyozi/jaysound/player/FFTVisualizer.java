@@ -39,7 +39,7 @@ public class FFTVisualizer {
                     g.setColor(Color.BLUE);
                     float band = fft.getBand(i);
 
-                    float newBand = Math.max(bandCache[i] - 0.4f, band);
+                    float newBand = Math.max(bandCache[i] - 0.8f, band);
                     int ha = ((int)newBand*4);
                     g.fillRect(i*2, height - ha, 2, ha);
 

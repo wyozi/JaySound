@@ -1,15 +1,13 @@
 package com.wyozi.jaysound.buffer;
 
-import com.wyozi.jaysound.Context;
+import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.decoder.Decoder;
-import com.wyozi.jaysound.sound.StreamingSound2;
-import com.wyozi.jaysound.util.MonofierOutputStream;
+import com.wyozi.jaysound.sound.StreamingSound;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 import org.pmw.tinylog.Logger;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
@@ -82,11 +80,12 @@ public class StreamBuffer extends Buffer {
         t.start();
     }
 
-    private Set<StreamingSound2> sounds = Collections.newSetFromMap(new WeakHashMap<>());
+    private Set<StreamingSound> sounds = Collections.newSetFromMap(new WeakHashMap<>());
 
-    public void registerSound(StreamingSound2 streamingSound2) {
-        sounds.add(streamingSound2);
+    public void registerSound(StreamingSound streamingSound) {
+        sounds.add(streamingSound);
     }
+
     public void update() {
         int soundCount = sounds.size();
         if (soundCount == 0) {
@@ -97,7 +96,7 @@ public class StreamBuffer extends Buffer {
         }
 
         try {
-            StreamingSound2 sound = sounds.iterator().next();
+            StreamingSound sound = sounds.iterator().next();
             if (!sound.isInitialSoundQueued()) {
 
                 // Only queue data from first buffer at this point. This allows sound to begin playing faster
@@ -117,6 +116,8 @@ public class StreamBuffer extends Buffer {
                         if (!inRotation) {
                             updateOpenALBuffer(buffer.openalId);
                             sound.queueBuffer(buffer.openalId);
+
+                            Logger.debug("Found buffer {} not in rotation; sending it to sound to be queud", buffer.openalId);
 
                             break;
                         }
@@ -150,17 +151,25 @@ public class StreamBuffer extends Buffer {
         return null;
     }
 
+    @Override
+    public byte[] getBufferData(int openalId) {
+        SingleBuffer buf = getBufferByOpenALId(openalId);
+        if (buf != null)
+            return buf.databuffer;
+        return null;
+    }
+
     private boolean updateOpenALBuffer(SingleBuffer buf) throws IOException {
         if (streamDataAvailable()) {
             byte[] databuffer = buf.databuffer;
 
-            streamDataInput.read(databuffer); // TODO this MUST fill the whole byte array, right?
+            int bytesRead = streamDataInput.read(databuffer);
             alBuffer.put(databuffer);
             alBuffer.flip();
 
-            Logger.debug("Read {} bytes of data from piped output; writing it to openal buffer", dataBufferSize);
+            Logger.debug("Read {} bytes of data to buffer of size {} from piped output; writing it to openal buffer", bytesRead, databuffer.length);
 
-            Context.checkALError();
+            AudioContext.checkALError();
 
             AL10.alBufferData(
                     buf.openalId,
@@ -168,7 +177,7 @@ public class StreamBuffer extends Buffer {
                     alBuffer,
                     sampleRate);
 
-            Context.checkALError();
+            AudioContext.checkALError();
 
             return true;
         }

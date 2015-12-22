@@ -1,16 +1,11 @@
 package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.buffer.StaticBuffer;
-import com.wyozi.jaysound.buffer.StreamBuffer;
 import com.wyozi.jaysound.decoder.MP3Decoder;
-import com.wyozi.jaysound.efx.EffectZone;
-import com.wyozi.jaysound.efx.effects.Echo;
 import com.wyozi.jaysound.sound.BufferedSound;
-import com.wyozi.jaysound.sound.StreamingSound2;
 import org.pmw.tinylog.Configurator;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -23,7 +18,7 @@ public class StaticBufferTest {
                 .level(org.pmw.tinylog.Level.DEBUG)
                 .activate();
 
-        Context context = new Context();
+        AudioContext context = new AudioContext();
 
         context.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 

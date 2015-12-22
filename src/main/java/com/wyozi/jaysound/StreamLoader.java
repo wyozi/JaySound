@@ -34,7 +34,7 @@ public class StreamLoader {
 
         String crlf = "\r\n";
         pw.print("GET " + url.getPath() + " HTTP/1.0 " + crlf);
-        pw.print("Icy-MetaData:0 " + crlf);
+        pw.print("Icy-MetaData: 0 " + crlf);
         pw.print(crlf);
         pw.flush();
 

@@ -1,6 +1,5 @@
 package com.wyozi.jaysound;
 
-import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.efx.EffectZone;
 import com.wyozi.jaysound.efx.effects.*;
 import com.wyozi.jaysound.player.FFTVisualizer;
@@ -20,11 +19,10 @@ public class ALStreamTest {
                 .level(org.pmw.tinylog.Level.DEBUG)
                 .activate();
 
-        Context ss = new Context();
+        AudioContext ss = new AudioContext();
         ss.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
         EffectZone zone = new EffectZone();
-        zone.addEffect(new Echo());
         zone.addEffect(new Flanger());
         ss.setGlobalEffectZone(zone);
 
@@ -41,7 +39,7 @@ public class ALStreamTest {
             //ss.updateListener(new Vec3f(x, 0, z), new Vec3f(0, 0, 1), null);
 
             ss.update();
-            handle.fft();
+            handle.updateFft();
             fftVisualizer.updateFFT(handle.getFft());
             Thread.sleep(20);
         }

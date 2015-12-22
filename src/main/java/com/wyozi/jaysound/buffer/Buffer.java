@@ -38,8 +38,14 @@ public abstract class Buffer {
         }
     }
 
+    public abstract byte[] getBufferData(int openalId);
+
     public int getChannelCount() {
         return channels;
+    }
+
+    public int getSampleRate() {
+        return sampleRate;
     }
 
     public abstract void dispose();

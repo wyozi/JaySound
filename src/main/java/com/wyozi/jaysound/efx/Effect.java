@@ -1,6 +1,6 @@
 package com.wyozi.jaysound.efx;
 
-import com.wyozi.jaysound.Context;
+import com.wyozi.jaysound.AudioContext;
 import org.lwjgl.openal.EXTEfx;
 
 /**
@@ -19,7 +19,7 @@ public abstract class Effect {
         this.id = org.lwjgl.openal.EXTEfx.alGenEffects();
         this.effectId = efxEffectId;
         EXTEfx.alEffecti(id, EXTEfx.AL_EFFECT_TYPE, this.effectId);
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
     protected void setFloat(int param, float value) {
@@ -27,7 +27,7 @@ public abstract class Effect {
             throw new RuntimeException("unable to set effect parameter on an effect already attached to a zone");
 
         EXTEfx.alEffectf(this.id, param, value);
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
     protected void setInt(int param, int value) {
@@ -35,7 +35,7 @@ public abstract class Effect {
             throw new RuntimeException("unable to set effect parameter on an effect already attached to a zone");
 
         EXTEfx.alEffecti(this.id, param, value);
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
 }

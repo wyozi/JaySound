@@ -2,6 +2,7 @@ package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.buffer.StaticBuffer;
+import com.wyozi.jaysound.buffer.StreamBuffer;
 import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.decoder.MP3Decoder;
 import com.wyozi.jaysound.decoder.OggDecoder;
@@ -23,14 +24,14 @@ import java.util.List;
  * @author Wyozi
  * @since 2.8.2015
  */
-public class Context {
+public class AudioContext {
     private final ALContext ctx;
 
     public static void checkALError() {
         int err = AL10.alGetError();
         if (err != AL10.AL_NO_ERROR) throw new RuntimeException("OpenAL Error: " + err);
     }
-    public Context() {
+    public AudioContext() {
         ctx = ALContext.create();
 
         Logger.debug("OpenAL Version: {}", AL10.alGetString(AL10.AL_VERSION));
@@ -121,8 +122,7 @@ public class Context {
     }
 
     public StreamingSound createStreamingSound(URL url) throws IOException {
-        StreamingSound sound = new StreamingSound();
-        sound.load(getDecoder(url, StreamLoader.openSoundStream(url)));
+        StreamingSound sound = new StreamingSound(new StreamBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true));
 
         onNewSoundCreated(sound);
 

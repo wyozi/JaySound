@@ -1,7 +1,6 @@
 package com.wyozi.jaysound.efx;
 
-import com.wyozi.jaysound.Context;
-import org.lwjgl.openal.AL10;
+import com.wyozi.jaysound.AudioContext;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.EXTEfx;
 
@@ -34,7 +33,7 @@ public class EffectZone {
         EXTEfx.alAuxiliaryEffectSloti(slot, EXTEfx.AL_EFFECTSLOT_EFFECT, effect.id);
         effectSlots.add(slot);
 
-        Context.checkALError();
+        AudioContext.checkALError();
 
         effect.attached = true;
     }

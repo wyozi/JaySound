@@ -1,12 +1,13 @@
 package com.wyozi.jaysound.sound;
 
-import com.wyozi.jaysound.Context;
+import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.buffer.Buffer;
 import com.wyozi.jaysound.efx.EffectZone;
+import com.wyozi.jaysound.util.DataConverterUtils;
+import ddf.minim.analysis.FFT;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
-import org.lwjgl.openal.EXTEfx;
 
 /**
  * @author Wyozi
@@ -16,9 +17,16 @@ public abstract class Sound {
     protected final int source;
     private final Buffer buffer;
 
+    private final FFT fft;
+
+    private final float[] fftBuffer;
     public Sound(Buffer buffer) {
         this.source = AL10.alGenSources();
         this.buffer = buffer;
+
+        final int fftTimeSize = 512;
+        this.fft = new FFT(fftTimeSize, this.buffer.getSampleRate());
+        this.fftBuffer = new float[fftTimeSize];
     }
 
     /**
@@ -30,11 +38,11 @@ public abstract class Sound {
         AL10.alSourcePlay(source);
         targetPlayState = true;
     }
+
     public void pause() {
         AL10.alSourcePause(source);
         targetPlayState = false;
     }
-
     public void update() {
         // Sets source state if it's not what we want
         // Especially big cases where this happens are play() before loading any sound data or streaming sound
@@ -60,21 +68,21 @@ public abstract class Sound {
         checkStereo();
 
         AL10.alSource3f(source, AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
     public void setDirection(JayVec3f dir) {
         checkStereo();
 
         AL10.alSource3f(source, AL10.AL_DIRECTION, dir.getJayX(), dir.getJayY(), dir.getJayZ());
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
     public void setVelocity(JayVec3f vel) {
         checkStereo();
 
         AL10.alSource3f(source, AL10.AL_VELOCITY, vel.getJayX(), vel.getJayY(), vel.getJayZ());
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
     /**
@@ -113,31 +121,75 @@ public abstract class Sound {
 
         AL10.alSourcef(source, AL10.AL_CONE_INNER_ANGLE, inner);
         AL10.alSourcef(source, AL10.AL_CONE_OUTER_ANGLE, outer);
-        Context.checkALError();
+        AudioContext.checkALError();
     }
+
     public void setOuterConeGain(float outerGain) {
         checkStereo();
 
         AL10.alSourcef(source, AL10.AL_CONE_OUTER_GAIN, outerGain);
-        Context.checkALError();
+        AudioContext.checkALError();
     }
-
     public void setVolume(float v) {
         AL10.alSourcef(source, AL10.AL_GAIN, v);
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
     public void setPitch(float v) {
         AL10.alSourcef(source, AL10.AL_PITCH, v);
-        Context.checkALError();
-    }
-
-    public void dispose() {
-        AL10.alDeleteSources(source);
-        Context.checkALError();
+        AudioContext.checkALError();
     }
 
     public void connectToEffectZone(EffectZone zone) {
         zone.connectALSource(this.source);
+    }
+
+    public FFT getFft() {
+        return fft;
+    }
+
+    public void updateFft() {
+        int curBuffer = AL10.alGetSourcei(source, AL10.AL_BUFFER);
+        int curSample = AL10.alGetSourcei(source, AL11.AL_SAMPLE_OFFSET);
+
+        byte[] data = this.buffer.getBufferData(curBuffer);
+
+        // If not playing return early
+        if (data == null) {
+            return;
+        }
+
+        int sampleLength = Math.min(fftBuffer.length, (data.length - curSample * 2) / 2);
+
+        for (int fftIndex = 0; fftIndex < sampleLength; fftIndex++) {
+            int sampleIndex = fftIndex + curSample;
+            int byte0 = data[sampleIndex * 2 + 0] & 0xFF;
+            int byte1 = data[sampleIndex * 2 + 1] & 0xFF;
+            fftBuffer[fftIndex] = DataConverterUtils.toNormalizedFloat((short) DataConverterUtils.toShort(byte0, byte1));
+        }
+
+        // TODO account for data buffer wraparounds
+        /*
+        float[] curBufferData = this.dataBuffers[curBufferLocal];
+
+        int remaining = curBufferData.length-curSample-1;
+        if (remaining > 0) {
+            int length = Math.min(FFT_SIZE, remaining);
+            System.arraycopy(curBufferData, curSample, tmpFft, 0, length);
+
+            // If we're nearing current buffer's end fetch some samples from the other buffer
+            if (remaining < FFT_SIZE) {
+                int samplesNeeded = FFT_SIZE - remaining;
+                float[] otherBufferData = this.dataBuffers[1 - curBufferLocal];
+                System.arraycopy(otherBufferData, 0, tmpFft, length, samplesNeeded);
+            }
+        }*/
+
+        this.fft.forward(fftBuffer);
+    }
+
+    public void dispose() {
+        AL10.alDeleteSources(source);
+        AudioContext.checkALError();
     }
 }
