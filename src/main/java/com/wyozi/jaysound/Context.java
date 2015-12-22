@@ -32,6 +32,8 @@ public class Context {
     public Context() {
         ctx = ALContext.create();
 
+        Logger.debug("OpenAL Version: {}", AL10.alGetString(AL10.AL_VERSION));
+
         Logger.debug("Using device '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_DEFAULT_DEVICE_SPECIFIER));
         Logger.debug("Available devices: '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_DEVICE_SPECIFIER));
         Logger.debug("Available extensions: '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_EXTENSIONS));
