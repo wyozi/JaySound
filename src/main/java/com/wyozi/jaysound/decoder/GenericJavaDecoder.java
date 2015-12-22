@@ -1,5 +1,7 @@
 package com.wyozi.jaysound.decoder;
 
+import com.wyozi.jaysound.StreamLoader;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -12,30 +14,23 @@ import java.io.InputStream;
  * Created by wyozi on 6.12.2015.
  */
 public class GenericJavaDecoder extends Decoder {
-    protected InputStream in;
     protected AudioFormat baseFormat;
     protected AudioFormat outFormat;
     protected AudioInputStream audioIn;
 
-    public GenericJavaDecoder(Settings settings, InputStream in) throws IOException {
-        super(settings);
-        this.in = in;
-
-        this.internalInit();
-    }
-
     public GenericJavaDecoder(InputStream in) throws IOException {
-        this(DEFAULT_SETTINGS, in);
+        super(in);
     }
 
     @Override
     protected void internalInit() throws IOException {
-        AudioInputStream audioIn = null;
+        AudioInputStream audioIn;
         try {
             audioIn = AudioSystem.getAudioInputStream(new BufferedInputStream(in));
         } catch (UnsupportedAudioFileException e) {
             throw new IOException(e);
         }
+
         this.baseFormat = audioIn.getFormat();
 
         this.channelCount = this.baseFormat.getChannels();

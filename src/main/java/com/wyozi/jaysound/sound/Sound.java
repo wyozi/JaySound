@@ -3,6 +3,7 @@ package com.wyozi.jaysound.sound;
 import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.buffer.Buffer;
+import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.efx.Filter;
 import com.wyozi.jaysound.efx.SoundEnvironment;
 import com.wyozi.jaysound.util.DataConverterUtils;
@@ -219,6 +220,16 @@ public abstract class Sound {
         }*/
 
         this.fft.forward(fftBuffer);
+    }
+
+    /**
+     * Returns the decoded title of the sound. Decoded means the title is parsed from the data input stream itself and
+     * thus can contain real-time data of eg. a web music stream track title.
+     *
+     * This also means that the title returned by this method can be inaccurate.
+     */
+    public String getDecodedTitle() {
+        return buffer.getDecodedTitle();
     }
 
     private boolean disposed = false;

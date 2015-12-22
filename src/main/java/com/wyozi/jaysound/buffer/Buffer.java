@@ -37,6 +37,13 @@ public abstract class Buffer {
         }
     }
 
+    /**
+     * @see Decoder#getDecodedTitle()
+     */
+    public String getDecodedTitle() {
+        return decoder.getDecodedTitle();
+    }
+
     public void update() { }
 
     public abstract byte[] getBufferData(int openalId);
