@@ -1,5 +1,6 @@
 package com.wyozi.jaysound;
 
+import com.sun.org.apache.regexp.internal.RE;
 import com.wyozi.jaysound.efx.EffectZone;
 import com.wyozi.jaysound.efx.effects.*;
 import com.wyozi.jaysound.player.FFTVisualizer;
@@ -23,7 +24,8 @@ public class ALStreamTest {
         ss.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
         EffectZone zone = new EffectZone();
-        zone.addEffect(new Flanger());
+        Reverb reverb = Reverb.getBestAvailableReverb(Reverb.EFXPreset.ARENA);
+        zone.addEffect(reverb);
         ss.setGlobalEffectZone(zone);
 
         StreamingSound handle = ss.createStreamingSound(new URL("http://wyozi.party:8080/f/Bank%20Head%20-%20Kingdom%20ft.%20Kelela.mp3"));
