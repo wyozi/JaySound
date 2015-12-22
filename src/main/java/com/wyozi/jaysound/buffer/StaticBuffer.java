@@ -54,7 +54,7 @@ public class StaticBuffer extends Buffer {
     }
 
     @Override
-    public void dispose() {
+    public void disposeBuffers() {
         AL10.alDeleteBuffers(this.buffer);
     }
 }

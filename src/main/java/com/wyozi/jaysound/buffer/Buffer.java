@@ -2,7 +2,6 @@ package com.wyozi.jaysound.buffer;
 
 import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.util.MonofierOutputStream;
-import org.lwjgl.openal.AL10;
 import org.pmw.tinylog.Logger;
 
 import java.io.IOException;
@@ -38,6 +37,8 @@ public abstract class Buffer {
         }
     }
 
+    public void update() { }
+
     public abstract byte[] getBufferData(int openalId);
 
     public int getChannelCount() {
@@ -48,5 +49,20 @@ public abstract class Buffer {
         return sampleRate;
     }
 
-    public abstract void dispose();
+    private boolean disposed = false;
+    protected abstract void disposeBuffers();
+
+    public final void dispose() {
+        disposeBuffers();
+        this.disposed = true;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        if (!disposed) {
+            dispose();
+        }
+    }
 }

@@ -3,6 +3,7 @@ package com.wyozi.jaysound.buffer;
 import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.sound.StreamingSound;
+import com.wyozi.jaysound.util.MiscUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 import org.pmw.tinylog.Logger;
@@ -80,12 +81,13 @@ public class StreamBuffer extends Buffer {
         t.start();
     }
 
-    private Set<StreamingSound> sounds = Collections.newSetFromMap(new WeakHashMap<>());
+    private Set<StreamingSound> sounds = MiscUtils.weakSet();
 
     public void registerSound(StreamingSound streamingSound) {
         sounds.add(streamingSound);
     }
 
+    @Override
     public void update() {
         int soundCount = sounds.size();
         if (soundCount == 0) {
@@ -190,7 +192,7 @@ public class StreamBuffer extends Buffer {
     }
 
     @Override
-    public void dispose() {
+    public void disposeBuffers() {
         for (SingleBuffer buffer : buffers) {
             AL10.alDeleteBuffers(buffer.openalId);
         }

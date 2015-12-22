@@ -6,6 +6,7 @@ import com.wyozi.jaysound.efx.effects.*;
 import com.wyozi.jaysound.player.FFTVisualizer;
 import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
+import org.lwjgl.openal.AL10;
 import org.pmw.tinylog.Configurator;
 
 import java.io.IOException;
@@ -18,12 +19,16 @@ public class ALStreamTest {
     public static void main(String[] args) throws InterruptedException, IOException {
         AudioContext ctx = new AudioContext();
 
-        Sound sound = ctx.createStreamingSound(new URL("https://upload.wikimedia.org/wikipedia/en/3/3d/Sample_of_Daft_Punk's_Da_Funk.ogg"));
+        EffectZone zone = new EffectZone();
+        zone.addEffect(Reverb.getBestAvailableReverb(Reverb.EFXPreset.ARENA));
+        ctx.setGlobalEffectZone(zone);
+
+        Sound sound = ctx.createStreamingSound(new URL("http://stream.plusfm.net/;"));
         sound.play();
 
-        for (int i = 0;i < 100; i++) {
+        for (int i = 0;i < 1000; i++) {
             ctx.update();
-            Thread.sleep(30);
+            Thread.sleep(1000);
         }
 
         ctx.dispose();

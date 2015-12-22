@@ -188,8 +188,21 @@ public abstract class Sound {
         this.fft.forward(fftBuffer);
     }
 
+    private boolean disposed = false;
+
     public void dispose() {
         AL10.alDeleteSources(source);
         AudioContext.checkALError();
+
+        this.disposed = true;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        if (!disposed) {
+            dispose();
+        }
     }
 }

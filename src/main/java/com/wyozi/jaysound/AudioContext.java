@@ -1,6 +1,7 @@
 package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.adapter.JayVec3f;
+import com.wyozi.jaysound.buffer.Buffer;
 import com.wyozi.jaysound.buffer.StaticBuffer;
 import com.wyozi.jaysound.buffer.StreamBuffer;
 import com.wyozi.jaysound.decoder.Decoder;
@@ -10,6 +11,7 @@ import com.wyozi.jaysound.efx.EffectZone;
 import com.wyozi.jaysound.sound.BufferedSound;
 import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
+import com.wyozi.jaysound.util.MiscUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.*;
 import org.pmw.tinylog.Logger;
@@ -19,6 +21,7 @@ import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Wyozi
@@ -60,7 +63,8 @@ public class AudioContext {
         AL10.alDistanceModel(AL10.AL_INVERSE_DISTANCE);
     }
 
-    private List<Sound> sounds = new ArrayList<>();
+    private Set<Buffer> buffers = MiscUtils.weakSet();
+    private Set<Sound> sounds = MiscUtils.weakSet();
 
     private EffectZone globalEffectZone;
 
@@ -73,14 +77,13 @@ public class AudioContext {
     }
 
     /**
-     * Streaming sounds require some plumbing to be done in the main OpenAL thread. Call this method to do the plumbing.
+     * Some sounds require some plumbing to be done in the main OpenAL thread. This method does the plumbing.
      *
-     * Not needed for buffered sounds.
+     * This method should be called a few times a second, but there are no specific timing needs.
      */
     public void update() {
-        for (Sound sound : sounds) {
-            sound.update();
-        }
+        for (Buffer buffer : buffers) buffer.update();
+        for (Sound sound : sounds) sound.update();
     }
 
     private FloatBuffer listenerOri = (FloatBuffer) BufferUtils.createFloatBuffer(6).put(new float[] { 0.0f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f }).rewind();
@@ -97,6 +100,9 @@ public class AudioContext {
     }
 
     public void dispose() {
+        for (Buffer buffer : buffers) buffer.dispose();
+        for (Sound sound : sounds) sound.dispose();
+
         ctx.destroy();
     }
 
@@ -113,17 +119,27 @@ public class AudioContext {
         sounds.add(sound);
     }
 
-    public Sound createBufferedSound(URL url) throws IOException {
-        BufferedSound sound = new BufferedSound(new StaticBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true));
+    public StaticBuffer createStaticBuffer(URL url) throws IOException {
+        StaticBuffer buffer = new StaticBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true);
+        buffers.add(buffer);
+        return buffer;
+    }
 
+    public StreamBuffer createStreamBuffer(URL url) throws IOException {
+        StreamBuffer buffer = new StreamBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true);
+        buffers.add(buffer);
+        return buffer;
+    }
+
+    public Sound createBufferedSound(URL url) throws IOException {
+        BufferedSound sound = new BufferedSound(createStaticBuffer(url));
         onNewSoundCreated(sound);
 
         return sound;
     }
 
     public StreamingSound createStreamingSound(URL url) throws IOException {
-        StreamingSound sound = new StreamingSound(new StreamBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true));
-
+        StreamingSound sound = new StreamingSound(createStreamBuffer(url));
         onNewSoundCreated(sound);
 
         return sound;

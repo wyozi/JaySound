@@ -19,14 +19,6 @@ public class StreamingSound extends Sound {
         this.streamBuffer.registerSound(this);
     }
 
-    @Override
-    public void update() {
-        super.update();
-
-        // TODO buffer shouldn't be updated here when there are multiple sounds using same buffer
-        this.streamBuffer.update();
-    }
-
     /**
      * @return OpenAL index of the oldest processed buffer. -1 if no buffers have been processed.
      */
