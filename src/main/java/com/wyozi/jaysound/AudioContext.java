@@ -7,7 +7,7 @@ import com.wyozi.jaysound.buffer.StreamBuffer;
 import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.decoder.MP3Decoder;
 import com.wyozi.jaysound.decoder.OggDecoder;
-import com.wyozi.jaysound.efx.EffectZone;
+import com.wyozi.jaysound.efx.SoundEnvironment;
 import com.wyozi.jaysound.sound.BufferedSound;
 import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
@@ -19,8 +19,6 @@ import org.pmw.tinylog.Logger;
 import java.io.*;
 import java.net.URL;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -66,13 +64,13 @@ public class AudioContext {
     private Set<Buffer> buffers = MiscUtils.weakSet();
     private Set<Sound> sounds = MiscUtils.weakSet();
 
-    private EffectZone globalEffectZone;
+    private SoundEnvironment globalSoundEnvironment;
 
-    public void setGlobalEffectZone(EffectZone zone) {
-        this.globalEffectZone = zone;
+    public void setGlobalSoundEnvironment(SoundEnvironment zone) {
+        this.globalSoundEnvironment = zone;
 
         for (Sound sound : sounds) {
-            sound.connectToEffectZone(this.globalEffectZone);
+            sound.connectToEnvironment(this.globalSoundEnvironment);
         }
     }
 
@@ -113,8 +111,8 @@ public class AudioContext {
     }
 
     protected void onNewSoundCreated(Sound sound) {
-        if (this.globalEffectZone != null)
-            sound.connectToEffectZone(this.globalEffectZone);
+        if (this.globalSoundEnvironment != null)
+            sound.connectToEnvironment(this.globalSoundEnvironment);
 
         sounds.add(sound);
     }

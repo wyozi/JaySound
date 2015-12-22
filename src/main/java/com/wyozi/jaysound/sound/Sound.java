@@ -3,7 +3,7 @@ package com.wyozi.jaysound.sound;
 import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.buffer.Buffer;
-import com.wyozi.jaysound.efx.EffectZone;
+import com.wyozi.jaysound.efx.SoundEnvironment;
 import com.wyozi.jaysound.util.DataConverterUtils;
 import ddf.minim.analysis.FFT;
 import org.lwjgl.openal.AL10;
@@ -140,7 +140,7 @@ public abstract class Sound {
         AudioContext.checkALError();
     }
 
-    public void connectToEffectZone(EffectZone zone) {
+    public void connectToEnvironment(SoundEnvironment zone) {
         zone.connectALSource(this.source);
     }
 

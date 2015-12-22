@@ -13,7 +13,7 @@ import java.util.Set;
  *
  * Created by wyozi on 20.12.2015.
  */
-public class EffectZone {
+public class SoundEnvironment {
     private final Set<Integer> effectSlots = new HashSet<Integer>();
     private boolean sourceConnected = false;
 
