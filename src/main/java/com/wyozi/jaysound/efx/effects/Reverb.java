@@ -19,6 +19,7 @@ public abstract class Reverb extends Effect {
         this.setDecayHFRatio(preset.flDecayHFRatio);
         this.setReverbDelay(preset.flReverbDelay);
         this.setRoomRolloffFactor(preset.flRoomRolloffFactor);
+        this.setReflectionsDelay(preset.flReflectionsDelay);
     }
 
     public abstract void setDiffusion(float f);
@@ -26,6 +27,7 @@ public abstract class Reverb extends Effect {
     public abstract void setDecayHFRatio(float f);
     public abstract void setReverbDelay(float f);
     public abstract void setRoomRolloffFactor(float f);
+    public abstract void setReflectionsDelay(float f);
 
     public static class EAXReverb extends Reverb {
         public EAXReverb(EFXPreset preset) {
@@ -82,10 +84,13 @@ public abstract class Reverb extends Effect {
         public void setLFReference(float f) {
             setFloat(EXTEfx.AL_EAXREVERB_LFREFERENCE, f);
         }
+        public void setReflectionsDelay(float f) {
+            setFloat(EXTEfx.AL_EAXREVERB_REFLECTIONS_DELAY, f);
+        }
     }
 
-    public static class GenericReverb extends Reverb {
-        public GenericReverb(EFXPreset preset) {
+    public static class StandardReverb extends Reverb {
+        public StandardReverb(EFXPreset preset) {
             super(EXTEfx.AL_EFFECT_REVERB, preset);
         }
 
@@ -104,12 +109,15 @@ public abstract class Reverb extends Effect {
         public void setRoomRolloffFactor(float f) {
             setFloat(EXTEfx.AL_REVERB_ROOM_ROLLOFF_FACTOR, f);
         }
+        public void setReflectionsDelay(float f) {
+            setFloat(EXTEfx.AL_REVERB_REFLECTIONS_DELAY, f);
+        }
     }
 
     /**
-     * Creates a reverb effect using given preset. There are two reverb effects: EAX and generic. EAX reverb supports
-     * a few more parameters than the generic reverb but is less widely available. This method automatically returns
-     * EAX reverb if it is available or generic reverb if it is not.
+     * Creates a reverb effect using given preset. There are two reverb effects: EAX and standard. EAX reverb supports
+     * a few more parameters than the standard reverb but is less widely available. This method automatically returns
+     * EAX reverb if it is available or standard reverb if it is not.
      * @param preset preset from {@link EFXPreset}
      * @return best reverb that is available on this system
      */
@@ -117,7 +125,7 @@ public abstract class Reverb extends Effect {
         if (EFXUtil.isEffectSupported(EXTEfx.AL_EFFECT_EAXREVERB)) {
             return new EAXReverb(preset);
         } else {
-            return new GenericReverb(preset);
+            return new StandardReverb(preset);
         }
     }
 
