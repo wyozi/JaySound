@@ -31,13 +31,11 @@ public class MonofierOutputStream extends OutputStream {
         }
     }
 
-    private static final float gain = (float) Math.pow(10.0f, (-6.0f / 20.0f));
-
     private void writeMono() throws IOException {
         int channel1 = DataConverterUtils.toShort(byteCache[0], byteCache[1]);
         int channel2 = DataConverterUtils.toShort(byteCache[2], byteCache[3]);
 
-        int combined = (int) ((channel1 + channel2) * gain);
+        int combined = (channel1 + channel2) / 2;
 
         out.write((combined) & 0xFF);
         out.write((combined >> 8) & 0xFF);
