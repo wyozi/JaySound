@@ -66,6 +66,13 @@ public class AudioContext {
 
     private SoundEnvironment globalSoundEnvironment;
 
+    /**
+     * Sets the global sound environment. These effects are immediately applied to <b>all</b> sounds currently in the world
+     * and added afterwards. Please use caution with this method; it is often advisable to add individual sounds to the sound
+     * environment instead.
+     *
+     * @param zone
+     */
     public void setGlobalSoundEnvironment(SoundEnvironment zone) {
         this.globalSoundEnvironment = zone;
 
@@ -97,6 +104,9 @@ public class AudioContext {
         }
     }
 
+    /**
+     * Disposes all sounds and buffers created through this context and finally destroys the context itself.
+     */
     public void dispose() {
         for (Buffer buffer : buffers) buffer.dispose();
         for (Sound sound : sounds) sound.dispose();
@@ -104,7 +114,9 @@ public class AudioContext {
         ctx.destroy();
     }
 
-    private Decoder getDecoder(URL url, InputStream stream) throws IOException {
+    private Decoder inferDecoder(URL url) throws IOException {
+        InputStream stream = StreamLoader.openSoundStream(url);
+
         if (url.getFile().endsWith(".ogg"))
             return new OggDecoder(stream);
         return new MP3Decoder(stream);
@@ -118,13 +130,13 @@ public class AudioContext {
     }
 
     public StaticBuffer createStaticBuffer(URL url) throws IOException {
-        StaticBuffer buffer = new StaticBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true);
+        StaticBuffer buffer = new StaticBuffer(inferDecoder(url), true);
         buffers.add(buffer);
         return buffer;
     }
 
     public StreamBuffer createStreamBuffer(URL url) throws IOException {
-        StreamBuffer buffer = new StreamBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true);
+        StreamBuffer buffer = new StreamBuffer(inferDecoder(url), true);
         buffers.add(buffer);
         return buffer;
     }

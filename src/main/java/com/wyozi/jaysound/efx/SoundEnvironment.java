@@ -8,8 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents an area in the world. An EffectZone has a set of effects that will be applied to all
- * audio sources that are part of the zone.
+ * Represents a set of sounds that have common set of effects applied to them. Usually this could be an area in the world.
  *
  * Created by wyozi on 20.12.2015.
  */

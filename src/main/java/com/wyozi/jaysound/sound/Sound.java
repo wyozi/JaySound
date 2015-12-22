@@ -64,25 +64,40 @@ public abstract class Sound {
             throw new RuntimeException("cannot set 3d parameter on stereo sound");
     }
 
+    /**
+     * Sets the sound position in the world.
+     */
+    public void setPos(float x, float y, float z) {
+        checkStereo();
+        AL10.alSource3f(source, AL10.AL_POSITION, x, y, z);
+        AudioContext.checkALError();
+    }
     public void setPos(JayVec3f pos) {
-        checkStereo();
-
-        AL10.alSource3f(source, AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());
-        AudioContext.checkALError();
+        setPos(pos.getJayX(), pos.getJayY(), pos.getJayZ());
     }
 
+    /**
+     * Sets the sound direction in the world (ie. to what direction the sound is pointing at)
+     */
+    public void setDirection(float x, float y, float z) {
+        checkStereo();
+        AL10.alSource3f(source, AL10.AL_DIRECTION, x, y, z);
+        AudioContext.checkALError();
+    }
     public void setDirection(JayVec3f dir) {
-        checkStereo();
-
-        AL10.alSource3f(source, AL10.AL_DIRECTION, dir.getJayX(), dir.getJayY(), dir.getJayZ());
-        AudioContext.checkALError();
+        setDirection(dir.getJayX(), dir.getJayY(), dir.getJayZ());
     }
 
-    public void setVelocity(JayVec3f vel) {
+    /**
+     * Sets the sound velocity in the world.
+     */
+    public void setVelocity(float x, float y, float z) {
         checkStereo();
-
-        AL10.alSource3f(source, AL10.AL_VELOCITY, vel.getJayX(), vel.getJayY(), vel.getJayZ());
+        AL10.alSource3f(source, AL10.AL_VELOCITY, x, y, z);
         AudioContext.checkALError();
+    }
+    public void setVelocity(JayVec3f vel) {
+        setVelocity(vel.getJayX(), vel.getJayY(), vel.getJayZ());
     }
 
     /**
@@ -140,6 +155,10 @@ public abstract class Sound {
         AudioContext.checkALError();
     }
 
+    /**
+     * Connects this sound to a {@link SoundEnvironment}
+     * @param zone
+     */
     public void connectToEnvironment(SoundEnvironment zone) {
         zone.connectALSource(this.source);
     }
@@ -148,6 +167,9 @@ public abstract class Sound {
         return fft;
     }
 
+    /**
+     * Updates FFT object to match currently playing samples.
+     */
     public void updateFft() {
         int curBuffer = AL10.alGetSourcei(source, AL10.AL_BUFFER);
         int curSample = AL10.alGetSourcei(source, AL11.AL_SAMPLE_OFFSET);
