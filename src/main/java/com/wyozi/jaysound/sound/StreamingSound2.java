@@ -12,10 +12,8 @@ import java.util.Set;
  * Created by wyozi on 22.12.2015.
  */
 public class StreamingSound2 extends Sound {
-    private final StreamBuffer buffer;
-
     public StreamingSound2(StreamBuffer buffer) {
-        this.buffer = buffer;
+        super(buffer);
         buffer.registerSound(this);
     }
 

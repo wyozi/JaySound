@@ -29,7 +29,7 @@ public class StreamingSound extends Sound {
     private final float[][] dataBuffers = new float[STREAMING_BUFFER_COUNT][200_000];
 
     public StreamingSound() {
-        super();
+        super(null);
 
         for (int i = 0;i < buffers.length; i++) {
             buffers[i] = AL10.alGenBuffers();

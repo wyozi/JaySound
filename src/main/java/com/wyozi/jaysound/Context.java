@@ -113,7 +113,7 @@ public class Context {
     }
 
     public Sound createBufferedSound(URL url) throws IOException {
-        BufferedSound sound = new BufferedSound(new StaticBuffer(getDecoder(url, StreamLoader.openSoundStream(url))));
+        BufferedSound sound = new BufferedSound(new StaticBuffer(getDecoder(url, StreamLoader.openSoundStream(url)), true));
 
         onNewSoundCreated(sound);
 

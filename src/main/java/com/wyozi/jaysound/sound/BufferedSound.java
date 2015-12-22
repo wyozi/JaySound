@@ -16,21 +16,9 @@ import java.nio.ByteBuffer;
  * @since 2.8.2015
  */
 public class BufferedSound extends Sound {
-    private final int buffer;
-
     public BufferedSound(StaticBuffer buffer) {
-        super();
-
-        this.buffer = AL10.alGenBuffers();
+        super(buffer);
         AL10.alSourcei(source, AL10.AL_BUFFER, buffer.getOpenALId());
-        Context.checkALError();
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-
-        AL10.alDeleteBuffers(buffer);
         Context.checkALError();
     }
 }

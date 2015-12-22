@@ -63,9 +63,8 @@ public class StreamBuffer extends Buffer {
      */
     private final PipedInputStream streamDataInput;
 
-    public StreamBuffer(Decoder decoder) {
-        sampleRate = decoder.getSampleRate();
-        channels = 1;
+    public StreamBuffer(Decoder decoder, boolean convertToMono) {
+        super(decoder, convertToMono);
 
         int dataPerSecond = SAMPLE_SIZE * sampleRate * channels;
         dataBufferSize = dataPerSecond * BUFFER_DURATION;
@@ -84,10 +83,10 @@ public class StreamBuffer extends Buffer {
     }
 
     private Set<StreamingSound2> sounds = Collections.newSetFromMap(new WeakHashMap<>());
+
     public void registerSound(StreamingSound2 streamingSound2) {
         sounds.add(streamingSound2);
     }
-
     public void update() {
         int soundCount = sounds.size();
         if (soundCount == 0) {
@@ -165,8 +164,7 @@ public class StreamBuffer extends Buffer {
 
             AL10.alBufferData(
                     buf.openalId,
-                    AL10.AL_FORMAT_MONO16,
-                    //targetChannelCount > 1 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
+                    this.channels == 2 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
                     alBuffer,
                     sampleRate);
 
@@ -177,8 +175,16 @@ public class StreamBuffer extends Buffer {
 
         return false;
     }
+
     private boolean updateOpenALBuffer(int openalBufferId) throws IOException {
         return updateOpenALBuffer(getBufferByOpenALId(openalBufferId));
+    }
+
+    @Override
+    public void dispose() {
+        for (SingleBuffer buffer : buffers) {
+            AL10.alDeleteBuffers(buffer.openalId);
+        }
     }
 
     private static class SingleBuffer {
@@ -201,15 +207,7 @@ public class StreamBuffer extends Buffer {
         public void run() {
             try {
                 PipedOutputStream streamDataOutput = new PipedOutputStream(streamDataInput);
-
-                OutputStream out = decoder.getChannelCount() == 2 ? new MonofierOutputStream(streamDataOutput) : streamDataOutput;
-
-                byte[] data = new byte[dataBufferSize];
-                int read;
-                while ((read = decoder.read(data, 0, data.length)) != -1) {
-                    //Logger.debug("Read {} bytes of data from decoder; writing it to piped output", read);
-                    out.write(data, 0, read);
-                }
+                StreamBuffer.this.readFully(streamDataOutput, dataBufferSize);
             } catch (IOException e) {
                 e.printStackTrace();
             }

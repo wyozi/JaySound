@@ -27,7 +27,7 @@ public class StaticBufferTest {
 
         context.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
-        StaticBuffer buf = new StaticBuffer(new MP3Decoder(StreamLoader.openSoundStream(new URL("http://wyozi.party:8080/f/forestmaze.mp3"))));
+        StaticBuffer buf = new StaticBuffer(new MP3Decoder(StreamLoader.openSoundStream(new URL("http://wyozi.party:8080/f/forestmaze.mp3"))), true);
         BufferedSound sound2 = new BufferedSound(buf);
         sound2.setRolloff(0.7f, 1f);
         sound2.play();

@@ -24,19 +24,15 @@ public class StreamBufferTest {
 
         context.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
-        StreamBuffer buf = new StreamBuffer(new MP3Decoder(StreamLoader.openSoundStream(new URL("http://stream.plusfm.net/;"))));
+        StreamBuffer buf = new StreamBuffer(new MP3Decoder(StreamLoader.openSoundStream(new URL("http://stream.plusfm.net/;"))), true);
         StreamingSound2 sound2 = new StreamingSound2(buf);
-        sound2.setRolloff(0.7f, 1f);
+        sound2.setRolloff(0.7f, 1.3f);
         sound2.play();
 
-        EffectZone zo = new EffectZone();
-        zo.addEffect(new Echo());
-        sound2.connectToEffectZone(zo);
-
         for (int i = 0;i < 50000; i++) {
-            float x = 0f;
-            float z = (float) (i / 60f) % 3;
-            //sound2.setPos(new ThrowawayVec3f(x, 0, z));
+            float x = (float) (Math.cos(i/30f)*1f);
+            float z = (float) (Math.sin(i/30f)*1.5f);
+            sound2.setPos(new ThrowawayVec3f(x, 0, z));
 
             buf.update();
             sound2.update();

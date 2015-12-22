@@ -2,6 +2,7 @@ package com.wyozi.jaysound.sound;
 
 import com.wyozi.jaysound.Context;
 import com.wyozi.jaysound.adapter.JayVec3f;
+import com.wyozi.jaysound.buffer.Buffer;
 import com.wyozi.jaysound.efx.EffectZone;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
@@ -13,9 +14,11 @@ import org.lwjgl.openal.EXTEfx;
  */
 public abstract class Sound {
     protected final int source;
+    private final Buffer buffer;
 
-    public Sound() {
+    public Sound(Buffer buffer) {
         this.source = AL10.alGenSources();
+        this.buffer = buffer;
     }
 
     /**
@@ -45,17 +48,31 @@ public abstract class Sound {
         }
     }
 
+    /**
+     * Makes sure that our data comes from mono source or throws an exception.
+     */
+    private void checkStereo() {
+        if (this.buffer.getChannelCount() == 2)
+            throw new RuntimeException("cannot set 3d parameter on stereo sound");
+    }
+
     public void setPos(JayVec3f pos) {
+        checkStereo();
+
         AL10.alSource3f(source, AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());
         Context.checkALError();
     }
 
     public void setDirection(JayVec3f dir) {
+        checkStereo();
+
         AL10.alSource3f(source, AL10.AL_DIRECTION, dir.getJayX(), dir.getJayY(), dir.getJayZ());
         Context.checkALError();
     }
 
     public void setVelocity(JayVec3f vel) {
+        checkStereo();
+
         AL10.alSource3f(source, AL10.AL_VELOCITY, vel.getJayX(), vel.getJayY(), vel.getJayZ());
         Context.checkALError();
     }
@@ -67,6 +84,8 @@ public abstract class Sound {
      * @param halfGainDistance distance at which gain is 50% of minDistance's gain.
      */
     public void setRolloff(float minDistance, float halfGainDistance) {
+        checkStereo();
+
         // TODO dynamically figure out which model we're using
         setInverseDistanceRolloff(minDistance, halfGainDistance);
     }
@@ -90,11 +109,15 @@ public abstract class Sound {
     }
 
     public void setCone(float inner, float outer) {
+        checkStereo();
+
         AL10.alSourcef(source, AL10.AL_CONE_INNER_ANGLE, inner);
         AL10.alSourcef(source, AL10.AL_CONE_OUTER_ANGLE, outer);
         Context.checkALError();
     }
     public void setOuterConeGain(float outerGain) {
+        checkStereo();
+
         AL10.alSourcef(source, AL10.AL_CONE_OUTER_GAIN, outerGain);
         Context.checkALError();
     }
