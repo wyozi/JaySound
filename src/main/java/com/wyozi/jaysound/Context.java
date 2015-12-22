@@ -1,6 +1,7 @@
 package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.adapter.JayVec3f;
+import com.wyozi.jaysound.buffer.StaticBuffer;
 import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.decoder.MP3Decoder;
 import com.wyozi.jaysound.decoder.OggDecoder;
@@ -112,8 +113,7 @@ public class Context {
     }
 
     public Sound createBufferedSound(URL url) throws IOException {
-        BufferedSound sound = new BufferedSound();
-        sound.load(getDecoder(url, StreamLoader.openStreamingSoundStream(url)));
+        BufferedSound sound = new BufferedSound(new StaticBuffer(getDecoder(url, StreamLoader.openSoundStream(url))));
 
         onNewSoundCreated(sound);
 
@@ -122,7 +122,7 @@ public class Context {
 
     public StreamingSound createStreamingSound(URL url) throws IOException {
         StreamingSound sound = new StreamingSound();
-        sound.load(getDecoder(url, StreamLoader.openStreamingSoundStream(url)));
+        sound.load(getDecoder(url, StreamLoader.openSoundStream(url)));
 
         onNewSoundCreated(sound);
 

@@ -7,8 +7,6 @@ import ddf.minim.analysis.FFT;
 import ddf.minim.analysis.HammingWindow;
 
 import javax.sound.sampled.*;
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 
@@ -23,7 +21,7 @@ public class FFTTest {
     private final FFTVisualizer visualizer;
 
     public FFTTest() throws IOException, LineUnavailableException {
-        decoder = new GenericJavaDecoder(StreamLoader.openStreamingSoundStream(new URL("http://stream.plusfm.net/")));
+        decoder = new GenericJavaDecoder(StreamLoader.openSoundStream(new URL("http://stream.plusfm.net/")));
         //decoder = new GenericJavaDecoder(Mp3DecoderTest.class.getResourceAsStream("/higher.mp3"));
 
         int channelCount = 1;

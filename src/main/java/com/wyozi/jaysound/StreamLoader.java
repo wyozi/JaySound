@@ -13,7 +13,7 @@ import java.net.URLConnection;
  * Created by wyozi on 6.12.2015.
  */
 public class StreamLoader {
-    static InputStream openStreamingSoundStream(URL url) throws IOException {
+    static InputStream openSoundStream(URL url) throws IOException {
         // Some streams return ICY header which doesn't work with openStream()
         // in those cases we open separate stream which accepts ICY headers
         try {
