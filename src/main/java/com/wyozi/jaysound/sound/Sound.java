@@ -3,11 +3,13 @@ package com.wyozi.jaysound.sound;
 import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.buffer.Buffer;
+import com.wyozi.jaysound.efx.Filter;
 import com.wyozi.jaysound.efx.SoundEnvironment;
 import com.wyozi.jaysound.util.DataConverterUtils;
 import ddf.minim.analysis.FFT;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
+import org.lwjgl.openal.EXTEfx;
 
 /**
  * @author Wyozi
@@ -161,6 +163,15 @@ public abstract class Sound {
      */
     public void connectToEnvironment(SoundEnvironment zone) {
         zone.connectALSource(this.source);
+    }
+
+    private Filter directFilter;
+    public Filter getDirectFilter() {
+        return directFilter;
+    }
+    public void setDirectFilter(Filter directFilter) {
+        this.directFilter = directFilter;
+        AL10.alSourcei(source, EXTEfx.AL_DIRECT_FILTER, directFilter.getId());
     }
 
     public FFT getFft() {

@@ -38,4 +38,7 @@ public abstract class Effect {
         AudioContext.checkALError();
     }
 
+    public void dispose() {
+        EXTEfx.alDeleteEffects(this.id);
+    }
 }
