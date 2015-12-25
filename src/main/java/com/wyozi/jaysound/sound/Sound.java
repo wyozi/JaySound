@@ -10,6 +10,7 @@ import ddf.minim.analysis.FFT;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.EXTEfx;
+import org.pmw.tinylog.Logger;
 
 /**
  * @author Wyozi
@@ -250,6 +251,7 @@ public abstract class Sound {
 
         if (!disposed) {
             dispose();
+            Logger.warn("Sound id #{} getting disposed by GC", this.source);
         }
     }
 }

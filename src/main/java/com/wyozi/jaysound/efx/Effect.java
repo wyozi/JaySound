@@ -2,6 +2,7 @@ package com.wyozi.jaysound.efx;
 
 import com.wyozi.jaysound.AudioContext;
 import org.lwjgl.openal.EXTEfx;
+import org.pmw.tinylog.Logger;
 
 /**
  * Created by wyozi on 20.12.2015.
@@ -49,7 +50,9 @@ public abstract class Effect {
     protected void finalize() throws Throwable {
         super.finalize();
 
-        if (!disposed)
+        if (!disposed) {
+            Logger.warn("Effect id #{} getting disposed by GC", this.id);
             dispose();
+        }
     }
 }
