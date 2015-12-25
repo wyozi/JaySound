@@ -68,12 +68,18 @@ public class AudioContext {
 
     /**
      * Sets the global sound environment. These effects are immediately applied to <b>all</b> sounds currently in the world
-     * and added afterwards. Please use caution with this method; it is often advisable to add individual sounds to the sound
+     * and added afterwards.
+     *
+     * Please use caution with this method; it is often advisable to add individual sounds to the sound
      * environment instead.
      *
      * @param zone
      */
     public void setGlobalSoundEnvironment(SoundEnvironment zone) {
+        if (this.globalSoundEnvironment != null) {
+            this.globalSoundEnvironment.disconnectAllSources();
+        }
+
         this.globalSoundEnvironment = zone;
 
         for (Sound sound : sounds) {

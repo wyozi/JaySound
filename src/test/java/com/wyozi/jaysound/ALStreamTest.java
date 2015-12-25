@@ -24,16 +24,20 @@ public class ALStreamTest {
 
         AudioContext ctx = new AudioContext();
 
-        SoundEnvironment zone = new SoundEnvironment();
-        zone.addEffect(Reverb.getBestAvailableReverb(Reverb.EFXPreset.ICEPALACE_HALL));
-        ctx.setGlobalSoundEnvironment(zone);
+        SoundEnvironment zone1 = new SoundEnvironment();
+        zone1.addEffect(Reverb.getBestAvailableReverb(Reverb.EFXPreset.ARENA));
+        zone1.addEffect(new Flanger());
+        ctx.setGlobalSoundEnvironment(zone1);
 
         StreamingSound sound = ctx.createStreamingSound(new URL("http://stream.plusfm.net/;"));
         sound.play();
 
         for (int i = 0;i < 1000; i++) {
+            if (i % 5 == 0) {
+                System.out.println(sound.getDecodedTitle());
+            }
+
             ctx.update();
-            System.out.println(sound.getDecodedTitle());
             Thread.sleep(1000);
         }
 
