@@ -3,4 +3,5 @@ libs/
 target/
 
 # IDEA
+.idea/
 JaySound.iml

@@ -3,7 +3,6 @@ package com.wyozi.jaysound.sound;
 import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.adapter.JayVec3f;
 import com.wyozi.jaysound.buffer.Buffer;
-import com.wyozi.jaysound.decoder.Decoder;
 import com.wyozi.jaysound.efx.Filter;
 import com.wyozi.jaysound.efx.SoundEnvironment;
 import com.wyozi.jaysound.util.DataConverterUtils;
@@ -163,7 +162,7 @@ public abstract class Sound {
      * @param zone
      */
     public void connectToEnvironment(SoundEnvironment zone) {
-        zone.connectALSource(this.source);
+        zone.connectSound(this);
     }
 
     private Filter directFilter;
@@ -220,6 +219,10 @@ public abstract class Sound {
         }*/
 
         this.fft.forward(fftBuffer);
+    }
+
+    public int getOpenALSourceId() {
+        return this.source;
     }
 
     /**

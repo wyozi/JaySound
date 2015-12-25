@@ -38,7 +38,18 @@ public abstract class Effect {
         AudioContext.checkALError();
     }
 
+    private boolean disposed = false;
+
     public void dispose() {
         EXTEfx.alDeleteEffects(this.id);
+        disposed = true;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        if (!disposed)
+            dispose();
     }
 }

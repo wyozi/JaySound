@@ -2,14 +2,14 @@
 package com.wyozi.jaysound.efx;
 
 import com.wyozi.jaysound.AudioContext;
-import org.lwjgl.openal.AL10;
+import com.wyozi.jaysound.sound.Sound;
+import com.wyozi.jaysound.util.MiscUtils;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.EXTEfx;
 import org.pmw.tinylog.Logger;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,8 +22,8 @@ public class SoundEnvironment {
     // Only queried when first sound environment is created
     private static int MAX_SOURCE_SENDS = -1;
 
-    private final Set<Integer> connectedSources = new HashSet<>();
-    private final List<Integer> effectSlots = new ArrayList<>();
+    private final Set<Sound> connectedSources = MiscUtils.weakSet();
+    private final List<EffectSlot> effectSlots = new ArrayList<>();
     private Filter filter;
 
     public SoundEnvironment() {
@@ -33,17 +33,20 @@ public class SoundEnvironment {
         }
     }
 
-    public void connectALSource(int sourceId) {
+    public void connectSound(Sound sound) {
         for (int i = 0; i < effectSlots.size(); i++) {
-            AL11.alSource3i(sourceId, EXTEfx.AL_AUXILIARY_SEND_FILTER, effectSlots.get(i), i, (filter != null) ? filter.getId() : EXTEfx.AL_FILTER_NULL);
+            EffectSlot slot = effectSlots.get(i);
+            if (slot == null) continue;
+
+            AL11.alSource3i(sound.getOpenALSourceId(), EXTEfx.AL_AUXILIARY_SEND_FILTER, slot.slotId, i, (filter != null) ? filter.getId() : EXTEfx.AL_FILTER_NULL);
         }
-        connectedSources.add(sourceId);
+        connectedSources.add(sound);
     }
 
     public void disconnectAllSources() {
-        for (int sourceId: connectedSources) {
+        for (Sound source: connectedSources) {
             for (int i = 0; i < effectSlots.size(); i++) {
-                AL11.alSource3i(sourceId, EXTEfx.AL_AUXILIARY_SEND_FILTER, EXTEfx.AL_EFFECTSLOT_NULL, i, EXTEfx.AL_FILTER_NULL);
+                AL11.alSource3i(source.getOpenALSourceId(), EXTEfx.AL_AUXILIARY_SEND_FILTER, EXTEfx.AL_EFFECTSLOT_NULL, i, EXTEfx.AL_FILTER_NULL);
             }
         }
         connectedSources.clear();
@@ -60,7 +63,7 @@ public class SoundEnvironment {
 
         int slot = EXTEfx.alGenAuxiliaryEffectSlots();
         EXTEfx.alAuxiliaryEffectSloti(slot, EXTEfx.AL_EFFECTSLOT_EFFECT, effect.id);
-        effectSlots.add(slot);
+        effectSlots.add(new EffectSlot(slot, effect));
 
         AudioContext.checkALError();
 
@@ -73,5 +76,15 @@ public class SoundEnvironment {
         }
 
         this.filter = filter;
+    }
+
+    private class EffectSlot {
+        public final int slotId;
+        public final Effect effect;
+
+        private EffectSlot(int slot, Effect effect) {
+            this.slotId = slot;
+            this.effect = effect;
+        }
     }
 }
