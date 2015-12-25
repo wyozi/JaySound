@@ -24,7 +24,7 @@ public class SoundEnvironment {
 
     private final Set<Sound> connectedSources = MiscUtils.weakSet();
     private final List<EffectSlot> effectSlots = new ArrayList<>();
-    private Filter filter;
+    private Filter auxSendFilter;
 
     public SoundEnvironment() {
         if (MAX_SOURCE_SENDS == -1) {
@@ -34,11 +34,14 @@ public class SoundEnvironment {
     }
 
     public void connectSound(Sound sound) {
+        final int filterId = (auxSendFilter != null) ? auxSendFilter.getId() : EXTEfx.AL_FILTER_NULL;
+        Logger.debug("Connecting sound environment to {} using auxSendFilter id {}", sound, filterId);
+
         for (int i = 0; i < effectSlots.size(); i++) {
             EffectSlot slot = effectSlots.get(i);
             if (slot == null) continue;
 
-            AL11.alSource3i(sound.getOpenALSourceId(), EXTEfx.AL_AUXILIARY_SEND_FILTER, slot.slotId, i, (filter != null) ? filter.getId() : EXTEfx.AL_FILTER_NULL);
+            AL11.alSource3i(sound.getOpenALSourceId(), EXTEfx.AL_AUXILIARY_SEND_FILTER, slot.slotId, i, filterId);
         }
         connectedSources.add(sound);
     }
@@ -70,12 +73,20 @@ public class SoundEnvironment {
         effect.attached = true;
     }
 
-    public void setFilter(Filter filter) {
+    /**
+     * Sets the filter to be used in between audio source and the effect.
+     *
+     * Note: the audible effect of this filter can be very subtle.
+     * Use direct filter ({@link Sound#setDirectFilter(Filter)} to affect the sound directly.
+     *
+     * @param filter
+     */
+    public void setAuxSendFilter(Filter filter) {
         if (connectedSources.size() > 0) {
-            throw new RuntimeException("Unable to set filter of zone with a connected sound source. Please create an issue on github (wyozi/JaySound) if this is needed.");
+            throw new RuntimeException("Unable to set auxSendFilter of zone with a connected sound source. Please create an issue on github (wyozi/JaySound) if this is needed.");
         }
 
-        this.filter = filter;
+        this.auxSendFilter = filter;
     }
 
     private class EffectSlot {

@@ -70,13 +70,31 @@ public abstract class Sound {
     /**
      * Sets the sound position in the world.
      */
-    public void setPos(float x, float y, float z) {
+    public void setPosition(float x, float y, float z) {
         checkStereo();
+        AL10.alSourcei(source, AL10.AL_SOURCE_RELATIVE, AL10.AL_FALSE);
         AL10.alSource3f(source, AL10.AL_POSITION, x, y, z);
         AudioContext.checkALError();
     }
-    public void setPos(JayVec3f pos) {
-        setPos(pos.getJayX(), pos.getJayY(), pos.getJayZ());
+    public void setPosition(JayVec3f pos) {
+        setPosition(pos.getJayX(), pos.getJayY(), pos.getJayZ());
+    }
+
+    /**
+     * @deprecated use {@link Sound#setPosition(JayVec3f)}
+     */
+    @Deprecated
+    public void setPos(JayVec3f pos) { setPosition(pos); }
+
+    /**
+     * Disables 3D-ness of the sound (ie. the gain will not be affected by listener position anymore)
+     *
+     * You can call {@link Sound#setPosition(float, float, float)} to re-enable 3D sound.
+     */
+    public void disable3D() {
+        AL10.alSourcei(source, AL10.AL_SOURCE_RELATIVE, AL10.AL_TRUE);
+        AL10.alSource3f(source, AL10.AL_POSITION, 0.0f, 0.0f, 0.0f);
+        AL10.alSource3f(source, AL10.AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     }
 
     /**
@@ -172,7 +190,7 @@ public abstract class Sound {
     }
     public void setDirectFilter(Filter directFilter) {
         this.directFilter = directFilter;
-        AL10.alSourcei(source, EXTEfx.AL_DIRECT_FILTER, directFilter.getId());
+        AL10.alSourcei(source, EXTEfx.AL_DIRECT_FILTER, directFilter != null ? directFilter.getId() : EXTEfx.AL_FILTER_NULL);
     }
 
     public FFT getFft() {

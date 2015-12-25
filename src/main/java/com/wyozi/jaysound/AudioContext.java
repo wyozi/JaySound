@@ -82,8 +82,10 @@ public class AudioContext {
 
         this.globalSoundEnvironment = zone;
 
-        for (Sound sound : sounds) {
-            sound.connectToEnvironment(this.globalSoundEnvironment);
+        if (this.globalSoundEnvironment != null) {
+            for (Sound sound : sounds) {
+                sound.connectToEnvironment(this.globalSoundEnvironment);
+            }
         }
     }
 

@@ -10,13 +10,9 @@ public class LowPass extends Filter {
     public LowPass() {
         super(EXTEfx.AL_FILTER_LOWPASS);
     }
-    public LowPass(float gain) {
+    public LowPass(Preset preset) {
         this();
-        this.setGain(gain);
-    }
-    public LowPass(float gain, float gainHF) {
-        this(gain);
-        this.setGainHF(gainHF);
+        preset.apply(this);
     }
 
     public void setGain(float f) {
@@ -24,5 +20,23 @@ public class LowPass extends Filter {
     }
     public void setGainHF(float f) {
         setFloat(EXTEfx.AL_LOWPASS_GAINHF, f);
+    }
+
+    public enum Preset {
+        /**
+         * Emulates sound coming from inside a car while listener is standing outside.
+         *
+         * Note: low pass filter by OpenAL is fairly limited. It might be worth it to use
+         * {@link com.wyozi.jaysound.efx.effects.Equalizer} instead if more elaborate effect is needed.
+         */
+        CarStereo {
+            @Override
+            protected void apply(LowPass lowPass) {
+                lowPass.setGain(0.9f);
+                lowPass.setGainHF(0.05f);
+            }
+        };
+
+        protected abstract void apply(LowPass lowPass);
     }
 }
