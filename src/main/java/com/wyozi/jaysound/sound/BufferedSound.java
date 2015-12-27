@@ -14,4 +14,11 @@ public class BufferedSound extends Sound {
         AL10.alSourcei(source, AL10.AL_BUFFER, buffer.getOpenALId());
         AudioContext.checkALError();
     }
+
+    /**
+     * Sets the looping status of this sound. A looping sound will loop until instructed to stop.
+     */
+    public void setLooping(boolean shouldLoop) {
+        AL10.alSourcei(source, AL10.AL_LOOPING, shouldLoop ? AL10.AL_TRUE : AL10.AL_FALSE);
+    }
 }

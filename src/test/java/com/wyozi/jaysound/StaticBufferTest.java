@@ -17,10 +17,15 @@ public class StaticBufferTest extends JaySoundTest {
 
         AudioContext context = new AudioContext();
 
-        BufferedSound sound2 = context.createBufferedSound(TEST_INTERNET_AUDIO_URL);
+        StaticBuffer staticBuffer = context.createStaticBuffer(TEST_INTERNET_AUDIO_URL);
+
+        BufferedSound sound1 = context.createBufferedSound(staticBuffer);
+        BufferedSound sound2 = context.createBufferedSound(staticBuffer);
+
+        sound1.play();
+        Thread.sleep(3000);
         sound2.play();
 
-        context.update();
-        Thread.sleep(25000);
+        Thread.sleep(10000);
     }
 }
