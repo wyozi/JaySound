@@ -38,7 +38,7 @@ public class StreamUnderflowTest extends JaySoundTest {
 
         // Feed the initial mp3 data (otherwise MP3Decoder#internalInit will block forever)
         feedAsync(urlStream, outPipe, 1024 * 40);
-        StreamBuffer buffer = new StreamBuffer(new GenericJavaDecoder(inPipe), false);
+        StreamBuffer buffer = new StreamBuffer(new MP3Decoder(inPipe), false);
 
         System.out.println("stream buffer initialized!");
 

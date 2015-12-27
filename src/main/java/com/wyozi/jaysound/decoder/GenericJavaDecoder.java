@@ -1,19 +1,16 @@
 package com.wyozi.jaysound.decoder;
 
-import com.wyozi.jaysound.StreamLoader;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
  * Created by wyozi on 6.12.2015.
  */
-public class GenericJavaDecoder extends Decoder {
+public abstract class GenericJavaDecoder extends Decoder {
     protected AudioFormat baseFormat;
     protected AudioFormat outFormat;
     protected AudioInputStream audioIn;
@@ -22,11 +19,13 @@ public class GenericJavaDecoder extends Decoder {
         super(in);
     }
 
+    protected abstract AudioInputStream createAudioInputStream() throws IOException, UnsupportedAudioFileException;
+
     @Override
     protected void internalInit() throws IOException {
         AudioInputStream audioIn;
         try {
-            audioIn = AudioSystem.getAudioInputStream(new BufferedInputStream(in));
+            audioIn = createAudioInputStream();
         } catch (UnsupportedAudioFileException e) {
             throw new IOException(e);
         }
