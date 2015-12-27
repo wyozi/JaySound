@@ -9,17 +9,15 @@ import org.pmw.tinylog.Logger;
  */
 public abstract class Effect {
     final int id;
-    private final int effectId;
 
     /**
-     * Is effect attached to a zone.
+     * Whether effect is attached to a {@link SoundEnvironment}.
      */
     boolean attached = false;
 
     public Effect(int efxEffectId) {
         this.id = org.lwjgl.openal.EXTEfx.alGenEffects();
-        this.effectId = efxEffectId;
-        EXTEfx.alEffecti(id, EXTEfx.AL_EFFECT_TYPE, this.effectId);
+        EXTEfx.alEffecti(id, EXTEfx.AL_EFFECT_TYPE, efxEffectId);
         AudioContext.checkALError();
     }
 

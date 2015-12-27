@@ -29,7 +29,7 @@ public class StaticBufferTest {
 
         for (int i = 0;i < 50000; i++) {
             float x = 0f;
-            float z = (float) (i / 60f) % 3;
+            float z = i / 60f % 3;
             //sound2.setPos(new ThrowawayVec3f(x, 0, z));
 
             sound2.update();

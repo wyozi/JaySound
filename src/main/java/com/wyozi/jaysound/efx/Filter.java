@@ -8,12 +8,10 @@ import org.lwjgl.openal.EXTEfx;
  */
 public abstract class Filter {
     private final int id;
-    private final int filterId;
 
     public Filter(int efxFilterId) {
         this.id = EXTEfx.alGenFilters();
-        this.filterId = efxFilterId;
-        EXTEfx.alFilteri(id, EXTEfx.AL_FILTER_TYPE, this.filterId);
+        EXTEfx.alFilteri(id, EXTEfx.AL_FILTER_TYPE, efxFilterId);
         AudioContext.checkALError();
     }
 

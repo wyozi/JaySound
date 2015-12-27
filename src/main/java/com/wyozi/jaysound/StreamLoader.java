@@ -150,8 +150,10 @@ public class StreamLoader {
             int metadataLength = in.read() * 16;
             if (metadataLength > 0) {
                 Logger.debug("Reading {} bytes of ICY stream metadata", metadataLength);
-
-                in.read(metadata, 0, metadataLength);
+                int actualRead = in.read(metadata, 0, metadataLength);
+                if (actualRead != metadataLength) {
+                    Logger.warn("Read {} bytes of metadata while metadataLength = {}", actualRead, metadataLength);
+                }
                 processMetadata(new String(metadata, "ASCII"));
             }
         }

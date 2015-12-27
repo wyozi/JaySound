@@ -1,4 +1,4 @@
-package com.wyozi.jaysound.player;
+package com.wyozi.jaysound;
 
 import ddf.minim.analysis.FFT;
 
@@ -34,7 +34,6 @@ public class FFTVisualizer {
 
                 int height = frame.getHeight() - 50;
 
-                int x = 0;
                 for (int i = 0;i < fft.specSize(); i++) {
                     g.setColor(Color.BLUE);
                     float band = fft.getBand(i);

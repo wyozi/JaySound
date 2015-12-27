@@ -96,8 +96,8 @@ public class AudioContext {
      * This method should be called a few times a second, but there are no specific timing needs.
      */
     public void update() {
-        for (Buffer buffer : buffers) buffer.update();
-        for (Sound sound : sounds) sound.update();
+        buffers.forEach(Buffer::update);
+        sounds.forEach(Sound::update);
     }
 
     private FloatBuffer listenerOri = (FloatBuffer) BufferUtils.createFloatBuffer(6).put(new float[] { 0.0f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f }).rewind();
@@ -117,8 +117,8 @@ public class AudioContext {
      * Disposes all sounds and buffers created through this context and finally destroys the context itself.
      */
     public void dispose() {
-        for (Buffer buffer : buffers) buffer.dispose();
-        for (Sound sound : sounds) sound.dispose();
+        buffers.forEach(Buffer::dispose);
+        sounds.forEach(Sound::dispose);
 
         ctx.destroy();
     }

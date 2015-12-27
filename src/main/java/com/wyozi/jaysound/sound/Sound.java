@@ -217,7 +217,7 @@ public abstract class Sound {
             int sampleIndex = fftIndex + curSample;
             int byte0 = data[sampleIndex * 2 + 0] & 0xFF;
             int byte1 = data[sampleIndex * 2 + 1] & 0xFF;
-            fftBuffer[fftIndex] = DataConverterUtils.toNormalizedFloat((short) DataConverterUtils.toShort(byte0, byte1));
+            fftBuffer[fftIndex] = DataConverterUtils.toNormalizedFloat(DataConverterUtils.toShort(byte0, byte1));
         }
 
         // TODO account for data buffer wraparounds

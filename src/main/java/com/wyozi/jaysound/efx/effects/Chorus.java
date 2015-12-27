@@ -12,7 +12,7 @@ public class Chorus extends Effect {
     }
 
     public enum Waveform {
-        Sin, Triangle;
+        Sin, Triangle
     }
     public void setWaveform(Waveform waveform) {
         int value = waveform == Waveform.Sin ? 0 : 1;
