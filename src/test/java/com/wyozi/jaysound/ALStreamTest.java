@@ -2,25 +2,16 @@ package com.wyozi.jaysound;
 
 import com.wyozi.jaysound.efx.SoundEnvironment;
 import com.wyozi.jaysound.efx.effects.*;
-import com.wyozi.jaysound.efx.filters.LowPass;
-import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
-import org.lwjgl.openal.ALC;
-import org.lwjgl.openal.ALC10;
-import org.pmw.tinylog.Configurator;
 
 import java.io.IOException;
-import java.net.URL;
 
 /**
  * Created by wyozi on 30.11.2015.
  */
-public class ALStreamTest {
+public class ALStreamTest extends JaySoundTest {
     public static void main(String[] args) throws InterruptedException, IOException {
-        Configurator.defaultConfig()
-                .formatPattern("{level}: {class}.{method}()\\t{message}")
-                .level(org.pmw.tinylog.Level.DEBUG)
-                .activate();
+        enableVerboseLogging();
 
         AudioContext ctx = new AudioContext();
 
@@ -29,7 +20,7 @@ public class ALStreamTest {
         //zone1.addEffect(new Flanger());
         ctx.setGlobalSoundEnvironment(zone1);
 
-        StreamingSound sound = ctx.createStreamingSound(new URL("http://stream.plusfm.net/;"));
+        StreamingSound sound = ctx.createStreamingSound(TEST_INTERNET_RADIO_URL);
         sound.play();
 
         for (int i = 0;i < 1000; i++) {

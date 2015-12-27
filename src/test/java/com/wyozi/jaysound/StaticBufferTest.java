@@ -11,18 +11,15 @@ import java.net.URL;
 /**
  * Created by wyozi on 22.12.2015.
  */
-public class StaticBufferTest {
+public class StaticBufferTest extends JaySoundTest {
     public static void main(String[] args) throws InterruptedException, IOException {
-        Configurator.defaultConfig()
-                .formatPattern("{level}: {class}.{method}()\\t{message}")
-                .level(org.pmw.tinylog.Level.DEBUG)
-                .activate();
+        enableVerboseLogging();
 
         AudioContext context = new AudioContext();
 
         context.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
-        StaticBuffer buf = new StaticBuffer(new MP3Decoder(StreamLoader.openSoundStream(new URL("http://wyozi.party:8080/f/forestmaze.mp3"))), true);
+        StaticBuffer buf = new StaticBuffer(new MP3Decoder(StreamLoader.openSoundStream(TEST_INTERNET_AUDIO_URL)), true);
         BufferedSound sound2 = new BufferedSound(buf);
         sound2.setRolloff(0.7f, 1f);
         sound2.play();
