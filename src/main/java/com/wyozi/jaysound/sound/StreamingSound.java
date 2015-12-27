@@ -19,6 +19,19 @@ public class StreamingSound extends Sound {
         this.streamBuffer.registerSound(this);
     }
 
+    @Override
+    public void update() {
+        super.update();
+
+        // Streaming sounds can experience problems with eg. buffer underflows
+        // or there not being enough samples in buffer when sound is played.
+        // For that reason StreamingSound must have some extra checks here to make
+        // sure the sound is playing if it should be playing.
+        if (commandedPlayState == PlayState.Playing && getState() != PlayState.Playing) {
+            play();
+        }
+    }
+
     /**
      * @return OpenAL index of the oldest processed buffer. -1 if no buffers have been processed.
      */

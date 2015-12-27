@@ -84,31 +84,43 @@ public abstract class Sound {
     }
 
     /**
-     * Whether sound should be playing or not.
+     * The play state user has told this sound to be in.
      */
-    protected boolean targetPlayState = false;
+    protected PlayState commandedPlayState;
 
+    /**
+     * Plays the sound.
+     */
     public void play() {
         AL10.alSourcePlay(source);
-        targetPlayState = true;
+        this.commandedPlayState = PlayState.Playing;
     }
 
+    /**
+     * Pauses the sound.
+     */
     public void pause() {
         AL10.alSourcePause(source);
-        targetPlayState = false;
+        this.commandedPlayState = PlayState.Paused;
     }
-    public void update() {
-        // Sets source state if it's not what we want
-        // Especially big cases where this happens are play() before loading any sound data or streaming sound
-        //      not loading enough data.
-        // TODO find a better way to do this (that does not require query and allows more states)
-        if ((AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) != targetPlayState) {
-            if (targetPlayState)
-                play();
-            else
-                pause();
-        }
+
+    /**
+     * Stops the sound.
+     *
+     * The sound will still be valid and can be restarted from beginning with {@link Sound#play()}
+     */
+    public void stop() {
+        AL10.alSourceStop(source);
+        this.commandedPlayState = PlayState.Stopped;
     }
+
+    /**
+     * Updates sound (ie. makes sure the sound's internal state matches expected)
+     *
+     * This is called automatically on all sounds in {@link AudioContext#update()}, but can be called
+     * manually if AudioContext is not used for some reason.
+     */
+    public void update() {}
 
     /**
      * Makes sure that our data comes from mono source or throws an exception.

@@ -17,19 +17,10 @@ public class StaticBufferTest extends JaySoundTest {
 
         AudioContext context = new AudioContext();
 
-        context.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
-
         BufferedSound sound2 = context.createBufferedSound(TEST_INTERNET_AUDIO_URL);
-        sound2.setRolloff(0.7f, 1f);
         sound2.play();
 
-        for (int i = 0;i < 50000; i++) {
-            float x = 0f;
-            float z = i / 60f % 3;
-            //sound2.setPos(new ThrowawayVec3f(x, 0, z));
-
-            sound2.update();
-            Thread.sleep(20);
-        }
+        context.update();
+        Thread.sleep(25000);
     }
 }
