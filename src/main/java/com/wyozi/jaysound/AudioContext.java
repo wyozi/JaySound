@@ -159,7 +159,7 @@ public class AudioContext {
         return buffer;
     }
 
-    public Sound createBufferedSound(URL url) throws IOException {
+    public BufferedSound createBufferedSound(URL url) throws IOException {
         BufferedSound sound = new BufferedSound(createStaticBuffer(url));
         onNewSoundCreated(sound);
 

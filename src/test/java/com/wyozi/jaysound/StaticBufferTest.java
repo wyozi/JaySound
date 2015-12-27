@@ -19,8 +19,7 @@ public class StaticBufferTest extends JaySoundTest {
 
         context.updateListener(new ThrowawayVec3f(0, 0, 0), new ThrowawayVec3f(0, 0, -1), new ThrowawayVec3f(0, 0, 0));
 
-        StaticBuffer buf = new StaticBuffer(new MP3Decoder(StreamLoader.openSoundStream(TEST_INTERNET_AUDIO_URL)), true);
-        BufferedSound sound2 = new BufferedSound(buf);
+        BufferedSound sound2 = context.createBufferedSound(TEST_INTERNET_AUDIO_URL);
         sound2.setRolloff(0.7f, 1f);
         sound2.play();
 
