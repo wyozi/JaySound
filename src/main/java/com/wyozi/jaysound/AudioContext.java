@@ -102,18 +102,48 @@ public class AudioContext {
         sounds.forEach(Sound::update);
     }
 
-    private FloatBuffer listenerOri = (FloatBuffer) BufferUtils.createFloatBuffer(6).put(new float[]{0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f}).rewind();
+    /**
+     * Sets listener position to given coordinates.
+     */
+    public void setListenerPosition(float x, float y, float z) {
+        AL10.alListener3f(AL10.AL_POSITION, x, y, z);
+    }
 
-    public void updateListener(JayVec3f pos, JayVec3f dir, JayVec3f velocity) {
-        AL10.alListener3f(AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());
-        if (dir != null) {
-            listenerOri.put(new float[]{dir.getJayX(), dir.getJayY(), dir.getJayZ(), 0.0f, 1.0f, 0.0f});
-            listenerOri.flip();
-            AL10.alListenerfv(AL10.AL_ORIENTATION, listenerOri);
-        }
-        if (velocity != null) {
-            AL10.alListener3f(AL10.AL_VELOCITY, velocity.getJayX(), velocity.getJayY(), velocity.getJayZ());
-        }
+    private FloatBuffer listenerOri = (FloatBuffer) BufferUtils.createFloatBuffer(6);
+
+    /**
+     * Sets listener orientation (aka. view direction) to given coordinates
+     */
+    public void setListenerOrientation(float dirX, float dirY, float dirZ, float upX, float upY, float upZ) {
+        listenerOri.put(new float[]{dirX, dirY, dirZ, upX, upY, upZ});
+        listenerOri.flip();
+        AL10.alListenerfv(AL10.AL_ORIENTATION, listenerOri);
+    }
+
+    /**
+     * Sets listener orientation (aka. view direction) to given coordinates
+     */
+    public void setListenerOrientation(float dirX, float dirY, float dirZ) {
+        setListenerOrientation(dirX, dirY, dirZ, 0f, 1f, 0f);
+    }
+
+    /**
+     * Sets listener velocity.
+     */
+    public void setListenerVelocity(float x, float y, float z) {
+        AL10.alListener3f(AL10.AL_VELOCITY, x, y, z);
+    }
+
+    /**
+     * Updates listener location in the world. Direction and velocity can be null.
+     * @param pos position in the world
+     * @param direction view direction
+     * @param velocity velocity in the world
+     */
+    public void updateListener(JayVec3f pos, JayVec3f direction, JayVec3f velocity) {
+        setListenerPosition(pos.getJayX(), pos.getJayY(), pos.getJayZ());
+        if (direction != null) setListenerOrientation(direction.getJayX(), direction.getJayY(), direction.getJayZ());
+        if (velocity != null) setListenerVelocity(velocity.getJayX(), velocity.getJayY(), velocity.getJayZ());
     }
 
     /**

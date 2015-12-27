@@ -144,12 +144,6 @@ public abstract class Sound {
     }
 
     /**
-     * @deprecated use {@link Sound#setPosition(JayVec3f)}
-     */
-    @Deprecated
-    public void setPos(JayVec3f pos) { setPosition(pos); }
-
-    /**
      * Disables 3D-ness of the sound (ie. the gain will not be affected by listener position anymore)
      *
      * You can call {@link Sound#setPosition(float, float, float)} to re-enable 3D sound.
