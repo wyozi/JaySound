@@ -32,6 +32,57 @@ public abstract class Sound {
         this.fftBuffer = new float[fftTimeSize];
     }
 
+    public Buffer getBuffer() {
+        return buffer;
+    }
+
+    public enum PlayState {
+        Initial(AL10.AL_INITIAL),
+        Playing(AL10.AL_PLAYING),
+        Paused(AL10.AL_PAUSED),
+        Stopped(AL10.AL_STOPPED);
+
+        private final int alid;
+
+        private PlayState(int alid) {
+            this.alid = alid;
+        }
+    }
+
+    /**
+     * Queries and returns the play state of this sound.
+     *
+     * Consider
+     *
+     * @return the current play state of the sound
+     */
+    public PlayState getState() {
+        int alState = AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE);
+
+        for (PlayState possibleState : PlayState.values()) {
+            if (possibleState.alid == alState) {
+                return possibleState;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return if this sound is active (ie. playing or paused).
+     */
+    public boolean isActive() {
+        PlayState state = getState();
+        return state == PlayState.Playing || state == PlayState.Paused;
+    }
+
+    /**
+     * @return if this sound is currently playing (note: does not mean that the sound can be currently heard)
+     */
+    public boolean isPlaying() {
+        return getState() == PlayState.Playing;
+    }
+
     /**
      * Whether sound should be playing or not.
      */
@@ -254,6 +305,9 @@ public abstract class Sound {
         return buffer.getDecodedTitle();
     }
 
+    /**
+     * Has the internal OpenAL sound object been disposed of
+     */
     private boolean disposed = false;
 
     public void dispose() {

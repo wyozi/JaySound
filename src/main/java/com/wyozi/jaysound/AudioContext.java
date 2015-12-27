@@ -31,8 +31,10 @@ public class AudioContext {
 
     public static void checkALError() {
         int err = AL10.alGetError();
-        if (err != AL10.AL_NO_ERROR) throw new RuntimeException("OpenAL Error: " + err + " (" + AL10.alGetString(err) + ")");
+        if (err != AL10.AL_NO_ERROR)
+            throw new RuntimeException("OpenAL Error: " + err + " (" + AL10.alGetString(err) + ")");
     }
+
     public AudioContext() {
         ctx = ALContext.create();
 
@@ -70,7 +72,7 @@ public class AudioContext {
     /**
      * Sets the global sound environment. These effects are immediately applied to <b>all</b> sounds currently in the world
      * and added afterwards.
-     *
+     * <p/>
      * Please use caution with this method; it is often advisable to add individual sounds to the sound
      * environment instead.
      *
@@ -92,7 +94,7 @@ public class AudioContext {
 
     /**
      * Some sounds require some plumbing to be done in the main OpenAL thread. This method does the plumbing.
-     *
+     * <p/>
      * This method should be called a few times a second, but there are no specific timing needs.
      */
     public void update() {
@@ -100,11 +102,12 @@ public class AudioContext {
         sounds.forEach(Sound::update);
     }
 
-    private FloatBuffer listenerOri = (FloatBuffer) BufferUtils.createFloatBuffer(6).put(new float[] { 0.0f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f }).rewind();
+    private FloatBuffer listenerOri = (FloatBuffer) BufferUtils.createFloatBuffer(6).put(new float[]{0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f}).rewind();
+
     public void updateListener(JayVec3f pos, JayVec3f dir, JayVec3f velocity) {
         AL10.alListener3f(AL10.AL_POSITION, pos.getJayX(), pos.getJayY(), pos.getJayZ());
         if (dir != null) {
-            listenerOri.put(new float[] {dir.getJayX(), dir.getJayY(), dir.getJayZ(), 0.0f, 1.0f, 0.0f});
+            listenerOri.put(new float[]{dir.getJayX(), dir.getJayY(), dir.getJayZ(), 0.0f, 1.0f, 0.0f});
             listenerOri.flip();
             AL10.alListenerfv(AL10.AL_ORIENTATION, listenerOri);
         }
@@ -135,6 +138,12 @@ public class AudioContext {
         if (this.globalSoundEnvironment != null)
             sound.connectToEnvironment(this.globalSoundEnvironment);
 
+        Buffer buffer = sound.getBuffer();
+        if (!buffers.contains(buffer)) {
+            Logger.debug("Rogue buffer found: {} has been added to audiocontext buffers via new sound", buffer);
+            buffers.add(buffer);
+        }
+
         sounds.add(sound);
     }
 
@@ -157,10 +166,14 @@ public class AudioContext {
         return sound;
     }
 
-    public StreamingSound createStreamingSound(URL url) throws IOException {
-        StreamingSound sound = new StreamingSound(createStreamBuffer(url));
+    public StreamingSound createStreamingSound(StreamBuffer buffer) throws IOException {
+        StreamingSound sound = new StreamingSound(buffer);
         onNewSoundCreated(sound);
 
         return sound;
+    }
+
+    public StreamingSound createStreamingSound(URL url) throws IOException {
+        return createStreamingSound(createStreamBuffer(url));
     }
 }

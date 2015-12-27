@@ -62,6 +62,11 @@ public class StreamBuffer extends Buffer {
      */
     private final PipedInputStream streamDataInput;
 
+    /**
+     * @see StreamBuffer#getUploadedByteCount()
+     */
+    private long uploadedBytes = 0;
+
     public StreamBuffer(Decoder decoder, boolean convertToMono) {
         super(decoder, convertToMono);
 
@@ -101,6 +106,8 @@ public class StreamBuffer extends Buffer {
             StreamingSound sound = sounds.iterator().next();
             if (!sound.isInitialSoundQueued()) {
 
+                Logger.debug("Queueing initial sound for streaming sound");
+
                 // Only queue data from first buffer at this point. This allows sound to begin playing faster
                 SingleBuffer buffer = buffers[0];
                 if (updateOpenALBuffer(buffer)) {
@@ -130,6 +137,8 @@ public class StreamBuffer extends Buffer {
 
                     int processedBuffer = sound.getProcessedBuffer();
                     if (processedBuffer != -1 && updateOpenALBuffer(processedBuffer)) {
+                        Logger.debug("Processed buffer! Updating it ");
+
                         sound.queueBuffer(processedBuffer);
                     }
                 }
@@ -140,6 +149,17 @@ public class StreamBuffer extends Buffer {
 
     }
 
+    /**
+     * @return the amount of bytes that have been uploaded to OpenAL buffers.
+     */
+    public long getUploadedByteCount() {
+        return uploadedBytes;
+    }
+
+    /**
+     * @return is there enough data in piped input to fill a single data buffer
+     * @throws IOException
+     */
     private boolean streamDataAvailable() throws IOException {
         return streamDataInput.available() >= dataBufferSize;
     }
@@ -165,6 +185,8 @@ public class StreamBuffer extends Buffer {
         if (streamDataAvailable()) {
             byte[] databuffer = buf.databuffer;
 
+            Logger.debug("Reading {} bytes of databuffer data from streamDataInput", databuffer.length);
+
             int bytesRead = streamDataInput.read(databuffer);
             alBuffer.put(databuffer);
             alBuffer.flip();
@@ -178,6 +200,7 @@ public class StreamBuffer extends Buffer {
                     this.channels == 2 ? AL10.AL_FORMAT_STEREO16 : AL10.AL_FORMAT_MONO16,
                     alBuffer,
                     sampleRate);
+            uploadedBytes += alBuffer.capacity();
 
             AudioContext.checkALError();
 
@@ -219,6 +242,7 @@ public class StreamBuffer extends Buffer {
             try {
                 PipedOutputStream streamDataOutput = new PipedOutputStream(streamDataInput);
                 StreamBuffer.this.readFully(streamDataOutput, dataBufferSize);
+                Logger.debug("Stream buffer has finished processing decoder inputstream");
             } catch (IOException e) {
                 e.printStackTrace();
             }
