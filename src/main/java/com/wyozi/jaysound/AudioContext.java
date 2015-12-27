@@ -27,6 +27,8 @@ import java.util.Set;
  * @since 2.8.2015
  */
 public class AudioContext {
+    private static final float NORMAL_SPEED_OF_SOUND = 343.3f;
+
     private final ALContext ctx;
 
     public static void checkALError() {
@@ -62,6 +64,21 @@ public class AudioContext {
         checkALError();
 
         AL10.alDistanceModel(AL10.AL_INVERSE_DISTANCE);
+    }
+
+    /**
+     * Sets how many meters is a unit in eg. vectors passed to {@link AudioContext#setListenerPosition(float, float, float)}
+     * or other methods that accept in-game coordinates.
+     *
+     * This method affects doppler and some EFX effects if used.
+     *
+     * @param metersPerUnit
+     */
+    public void setMetersPerUnit(float metersPerUnit) {
+        if (EFXUtil.isEfxSupported()) {
+            AL10.alListenerf(EXTEfx.AL_METERS_PER_UNIT, metersPerUnit);
+        }
+        AL11.alSpeedOfSound(NORMAL_SPEED_OF_SOUND * metersPerUnit);
     }
 
     private Set<Buffer> buffers = MiscUtils.weakSet();
