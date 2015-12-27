@@ -1,7 +1,8 @@
 package com.wyozi.jaysound.efx.effects;
 
+import com.wyozi.jaysound.AudioContext;
 import com.wyozi.jaysound.efx.Effect;
-import org.lwjgl.openal.EFXUtil;
+import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.EXTEfx;
 
 /**
@@ -184,11 +185,14 @@ public abstract class Reverb extends Effect {
      * @return best reverb that is available on this system
      */
     public static Reverb getBestAvailableReverb(EFXPreset preset) {
-        if (EFXUtil.isEffectSupported(EXTEfx.AL_EFFECT_EAXREVERB)) {
-            return new EAXReverb(preset);
-        } else {
-            return new StandardReverb(preset);
+        AudioContext.checkALError(); // make sure there's no error BEFORE trying to create eax reverb
+
+        Reverb reverb = new EAXReverb(preset);
+        if (AL10.alGetError() == AL10.AL_NO_ERROR) {
+            return reverb;
         }
+
+        return new StandardReverb(preset);
     }
 
     /**

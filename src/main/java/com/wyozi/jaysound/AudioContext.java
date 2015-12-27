@@ -11,6 +11,7 @@ import com.wyozi.jaysound.efx.SoundEnvironment;
 import com.wyozi.jaysound.sound.BufferedSound;
 import com.wyozi.jaysound.sound.Sound;
 import com.wyozi.jaysound.sound.StreamingSound;
+import com.wyozi.jaysound.util.EFXUtil;
 import com.wyozi.jaysound.util.MiscUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.*;
@@ -30,16 +31,16 @@ public class AudioContext {
 
     public static void checkALError() {
         int err = AL10.alGetError();
-        if (err != AL10.AL_NO_ERROR) throw new RuntimeException("OpenAL Error: " + err);
+        if (err != AL10.AL_NO_ERROR) throw new RuntimeException("OpenAL Error: " + err + " (" + AL10.alGetString(err) + ")");
     }
     public AudioContext() {
         ctx = ALContext.create();
 
         Logger.debug("OpenAL Version: {}", AL10.alGetString(AL10.AL_VERSION));
 
-        Logger.debug("Using device '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_DEFAULT_DEVICE_SPECIFIER));
-        Logger.debug("Available devices: '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_DEVICE_SPECIFIER));
-        Logger.debug("Available extensions: '{}'", ALC10.alcGetString(ctx.getPointer(), ALC10.ALC_EXTENSIONS));
+        Logger.debug("Using device '{}'", ALC10.alcGetString(ctx.address(), ALC10.ALC_DEFAULT_DEVICE_SPECIFIER));
+        Logger.debug("Available devices: '{}'", ALC10.alcGetString(ctx.address(), ALC10.ALC_DEVICE_SPECIFIER));
+        Logger.debug("Available extensions: '{}'", ALC10.alcGetString(ctx.address(), ALC10.ALC_EXTENSIONS));
 
         Logger.debug("EFX Support: {}", EFXUtil.isEfxSupported());
 
